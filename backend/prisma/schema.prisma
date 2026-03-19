@@ -284,7 +284,7 @@ model ChangeOrder {
   id            String    @id
   number        String
   companyId     Int
-  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade) // Added missing relation
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
   projId        String
   project       Project   @relation(fields: [projId], references: [id], onDelete: Cascade)
   custId        Int?
@@ -310,6 +310,7 @@ model ChangeOrder {
 model Expense {
   id            Int       @id @default(autoincrement())
   companyId     Int       @default(1)
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
   projId        String?
   project       Project?  @relation(fields: [projId], references: [id], onDelete: SetNull)
   date          String
@@ -322,6 +323,7 @@ model Expense {
   notes         String?   @db.Text
   createdAt     DateTime  @default(now())
 
+  @@index([companyId])
   @@index([projId])
 }
 
