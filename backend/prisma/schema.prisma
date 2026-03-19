@@ -1,0 +1,341 @@
+// ─────────────────────────────────────────────────────
+// ContractorOS Pro — Prisma Schema
+// Database: PostgreSQL
+// ─────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── COMPANY ──────────────────────────────────────────
+model Company {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  owner               String?
+  phone               String?
+  email               String?
+  address             String?
+  website             String?
+  license             String?
+  ein                 String?
+  logo                String?   @db.Text
+  defaultTaxRate      Float     @default(6.5)
+  paymentTerms        Int       @default(30)
+  laborBurdenDefault  Float     @default(28.3)
+  invoiceFooter       String?   @db.Text
+  estimateFooter      String?   @db.Text
+
+  // Email settings
+  smtpHost            String?
+  smtpPort            Int?      @default(587)
+  smtpUser            String?
+  smtpPass            String?
+  smtpSecure          Boolean   @default(true)
+  emailFromName       String?
+  emailReplyTo        String?
+  emailSignature      String?   @db.Text
+  emailSubjectEstimate String?
+  emailSubjectInvoice  String?
+  emailBodyEstimate   String?   @db.Text
+  emailBodyInvoice    String?   @db.Text
+
+  // Notification toggles
+  notifyEstimateSent    Boolean @default(true)
+  notifyEstimateApproved Boolean @default(true)
+  notifyEstimateDeclined Boolean @default(true)
+  notifyInvoiceSent     Boolean @default(true)
+  notifyInvoicePaid     Boolean @default(true)
+  notifyInvoiceOverdue  Boolean @default(true)
+  notifyPaymentReminder Boolean @default(true)
+  reminderDaysBefore    Int     @default(3)
+  overdueFollowupDays   Int     @default(7)
+
+  // Theme
+  themeAccent         String?   @default("#3b82f6")
+  themeName           String?   @default("Ocean Blue")
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  users               User[]
+  customers           Customer[]
+  projects            Project[]
+  estimates           Estimate[]
+  invoices            Invoice[]
+  subcontractors      Subcontractor[]
+  materials           Material[]
+  laborRoles          LaborRole[]
+  changeOrders        ChangeOrder[]
+  expenses            Expense[]
+}
+
+// ── USERS ────────────────────────────────────────────
+model User {
+  id            Int       @id @default(autoincrement())
+  companyId     Int
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name          String
+  email         String    @unique
+  passwordHash  String
+  phone         String?
+  role          String    @default("Field Tech")   // Owner, Admin, Project Manager, Estimator, Foreman, Bookkeeper, Field Tech, Read Only
+  status        String    @default("active")       // active, invited, disabled
+  avatar        String?   @db.Text
+  lastLogin     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([companyId])
+  @@index([email])
+}
+
+// ── CUSTOMERS ────────────────────────────────────────
+model Customer {
+  id            Int       @id @default(autoincrement())
+  companyId     Int
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name          String
+  phone         String?
+  email         String?
+  address       String?
+  propertyType  String?
+  leadSource    String?
+  notes         String?   @db.Text
+  tags          String[]
+  totalRevenue  Float     @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  estimates     Estimate[]
+  invoices      Invoice[]
+  projects      Project[]
+  changeOrders  ChangeOrder[]
+
+  @@index([companyId])
+}
+
+// ── ESTIMATES ────────────────────────────────────────
+model Estimate {
+  id            String    @id
+  number        String
+  companyId     Int
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  custId        Int?
+  customer      Customer? @relation(fields: [custId], references: [id], onDelete: SetNull)
+  projId        String?
+  name          String
+  status        String    @default("draft")  // draft, sent, approved, declined
+  date          String
+  expiry        String
+  taxRate       Float     @default(6.5)
+  discount      Float     @default(0)
+  notes         String?   @db.Text
+  subtotal      Float     @default(0)
+  materialSubtotal Float  @default(0)
+  lineItems     Json      @default("[]")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  invoices      Invoice[]
+
+  @@index([companyId])
+  @@index([custId])
+}
+
+// ── PROJECTS ─────────────────────────────────────────
+model Project {
+  id              String    @id
+  name            String
+  companyId       Int
+  company         Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  custId          Int?
+  customer        Customer? @relation(fields: [custId], references: [id], onDelete: SetNull)
+  estId           String?
+  status          String    @default("active")  // active, complete, on_hold, cancelled
+  contractValue   Float     @default(0)
+  budgetLabor     Float     @default(0)
+  budgetMaterials Float     @default(0)
+  actualLabor     Float     @default(0)
+  actualMaterials Float     @default(0)
+  start           String?
+  end             String?
+  phase           String?
+  progress        Int       @default(0)
+  notes           String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  invoices        Invoice[]
+  timeEntries     TimeEntry[]
+  changeOrders    ChangeOrder[]
+  expenses        Expense[]
+
+  @@index([companyId])
+  @@index([custId])
+}
+
+// ── INVOICES ─────────────────────────────────────────
+model Invoice {
+  id            String    @id
+  number        String
+  companyId     Int
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  custId        Int?
+  customer      Customer? @relation(fields: [custId], references: [id], onDelete: SetNull)
+  projId        String?
+  project       Project?  @relation(fields: [projId], references: [id], onDelete: SetNull)
+  estId         String?
+  estimate      Estimate? @relation(fields: [estId], references: [id], onDelete: SetNull)
+  status        String    @default("draft")  // draft, sent, paid, overdue, void
+  issueDate     String
+  dueDate       String
+  paidDate      String?
+  discount      Float     @default(0)
+  taxRate       Float     @default(6.5)
+  notes         String?   @db.Text
+  lineItems     Json      @default("[]")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([companyId])
+  @@index([custId])
+  @@index([status])
+}
+
+// ── MATERIALS ────────────────────────────────────────
+model Material {
+  id          Int       @id @default(autoincrement())
+  companyId   Int
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name        String
+  unit        String?
+  category    String?
+  supplier    String?
+  cost        Float     @default(0)
+  markup      Float     @default(0)
+  stock       Int       @default(0)
+  reorderAt   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([companyId])
+}
+
+// ── SUBCONTRACTORS ───────────────────────────────────
+model Subcontractor {
+  id            Int       @id @default(autoincrement())
+  companyId     Int
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name          String
+  companyName   String?
+  role          String?
+  hourlyWage    Float     @default(0)
+  billableRate  Float     @default(0)
+  status        String    @default("active")
+  phone         String?
+  email         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  timeEntries   TimeEntry[]
+
+  @@index([companyId])
+}
+
+// ── TIME ENTRIES ─────────────────────────────────────
+model TimeEntry {
+  id          Int           @id @default(autoincrement())
+  subId       Int
+  sub         Subcontractor @relation(fields: [subId], references: [id], onDelete: Cascade)
+  projId      String
+  project     Project       @relation(fields: [projId], references: [id], onDelete: Cascade)
+  date        String
+  hours       Float
+  desc        String?
+  approved    Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+
+  @@index([subId])
+  @@index([projId])
+}
+
+// ── LABOR ROLES ──────────────────────────────────────
+model LaborRole {
+  id          Int       @id @default(autoincrement())
+  companyId   Int
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  title       String
+  baseRate    Float     @default(0)
+  payrollPct  Float     @default(15.3)
+  benefitsPct Float     @default(12.0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([companyId])
+}
+
+// ── CHANGE ORDERS ────────────────────────────────────
+model ChangeOrder {
+  id            String    @id
+  number        String
+  companyId     Int
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade) // Added missing relation
+  projId        String
+  project       Project   @relation(fields: [projId], references: [id], onDelete: Cascade)
+  custId        Int?
+  customer      Customer? @relation(fields: [custId], references: [id], onDelete: SetNull)
+  status        String    @default("pending")  // pending, approved, declined, invoiced
+  date          String
+  description   String
+  reason        String?
+  discount      Float     @default(0)
+  laborAmt      Float     @default(0)
+  materialAmt   Float     @default(0)
+  totalAmt      Float     @default(0)
+  approvedBy    String?
+  approvedDate  String?
+  notes         String?   @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([projId])
+}
+
+// ── EXPENSES ─────────────────────────────────────────
+model Expense {
+  id            Int       @id @default(autoincrement())
+  companyId     Int       @default(1)
+  projId        String?
+  project       Project?  @relation(fields: [projId], references: [id], onDelete: SetNull)
+  date          String
+  category      String
+  vendor        String?
+  description   String?
+  amount        Float     @default(0)
+  receipt       Boolean   @default(false)
+  reimbursable  Boolean   @default(false)
+  notes         String?   @db.Text
+  createdAt     DateTime  @default(now())
+
+  @@index([projId])
+}
+
+// ── EMAIL LOG ────────────────────────────────────────
+model EmailLog {
+  id          Int       @id @default(autoincrement())
+  companyId   Int       @default(1)
+  type        String    // estimate, invoice, reminder
+  docId       String?
+  toEmail     String
+  ccEmail     String?
+  subject     String
+  body        String    @db.Text
+  status      String    @default("sent")  // sent, failed, bounced
+  sentAt      DateTime  @default(now())
+  sentBy      Int?
+}

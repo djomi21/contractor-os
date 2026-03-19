@@ -1,0 +1,24 @@
+# render.yaml — Blueprint for Render deployment
+# Place this in the ROOT of your GitHub repo
+
+services:
+  - type: web
+    name: contractor-os-api
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate
+    startCommand: npx prisma migrate deploy && node src/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false  # You'll paste your Supabase URL here
+      - key: JWT_SECRET
+        generateValue: true  # Render auto-generates a random value
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        sync: false  # You'll paste your Vercel URL here
