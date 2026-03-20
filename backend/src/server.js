@@ -71,8 +71,22 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
 });
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, '0.0.0.0', () => {
+```
+
+(Render's default port is 10000, not 4000)
+
+Save the file, then push to GitHub:
+```
+git add .
+git commit -m "Fix Render port binding"
+git push
+```
+
+Render will auto-redeploy. Watch the logs — you should see:
+```
+ContractorOS Pro API — Port 10000
   console.log(`\n  ╔══════════════════════════════════════╗`);
   console.log(`  ║  ContractorOS Pro API — Port ${PORT}    ║`);
   console.log(`  ║  Environment: ${(process.env.NODE_ENV || 'dev').padEnd(20)}║`);
