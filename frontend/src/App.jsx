@@ -848,6 +848,12 @@ export default function App() {
     setDataLoaded(false); // triggers re-fetch
   }, []);
 
+  // Update auth data without triggering a full reload (for profile edits)
+  const updateAuth = useCallback((user) => {
+    saveUser(user);
+    setAuth(user);
+  }, []);
+
   // ── Logout ─────────────────────────────────────────
   const handleLogout = useCallback(() => {
     api.logout();
@@ -933,7 +939,7 @@ export default function App() {
     users:    makeDb(setUsers, api.users),
   };
 
-  const sh = {custs,setCusts,ests,setEsts,projs,setProjs,mats,setMats,subs,setSubs,roles,setRoles,hrs,setHrs,invs,setInvs,cos,setCos,expenses,setExpenses,company,setCompany,users,setUsers,auth,setAuth:handleAuth,showToast,setTab,handleLogout,db};
+  const sh = {custs,setCusts,ests,setEsts,projs,setProjs,mats,setMats,subs,setSubs,roles,setRoles,hrs,setHrs,invs,setInvs,cos,setCos,expenses,setExpenses,company,setCompany,users,setUsers,auth,setAuth:handleAuth,updateAuth,showToast,setTab,handleLogout,db};
 
   // ── Loading screen ─────────────────────────────────
   if (!dataLoaded && auth) return (
@@ -2859,7 +2865,7 @@ function Expenses({expenses,setExpenses,projs,showToast,db}) {
 // ══════════════════════════════════════════════════════════════
 // USER PROFILE
 // ══════════════════════════════════════════════════════════════
-function UserProfile({auth,setAuth,users,setUsers,company,showToast,setTab,handleLogout}) {
+function UserProfile({auth,setAuth,updateAuth,users,setUsers,company,showToast,setTab,handleLogout}) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({name:auth.name,email:auth.email,phone:auth.phone||""});
   const [passForm, setPassForm] = useState({current:"",newPass:"",confirm:""});
@@ -2878,8 +2884,7 @@ function UserProfile({auth,setAuth,users,setUsers,company,showToast,setTab,handl
     try {
       const updated = await api.users.update(auth.id, { name:form.name.trim(), email:form.email.trim(), phone:form.phone.trim() });
       const newAuth = {...auth, name:updated.name||form.name.trim(), email:updated.email||form.email.trim(), phone:updated.phone||form.phone.trim()};
-      setAuth(newAuth);
-      saveUser(newAuth);
+      updateAuth(newAuth);
       setUsers(us => us.map(u => u.id === auth.id ? {...u, name:newAuth.name, email:newAuth.email, phone:newAuth.phone} : u));
       setEditing(false);
       showToast("Profile updated");
@@ -2911,8 +2916,7 @@ function UserProfile({auth,setAuth,users,setUsers,company,showToast,setTab,handl
     reader.onload = (ev) => {
       const dataUrl = ev.target.result;
       const updated = {...auth, avatar: dataUrl};
-      setAuth(updated);
-      saveUser(updated);
+      updateAuth(updated);
       setUsers(us => us.map(u => u.id === auth.id ? {...u, avatar: dataUrl} : u));
       api.users.update(auth.id, {avatar: dataUrl}).catch(e => console.error('photo save:', e.message));
       showToast("Photo updated");
@@ -2922,8 +2926,7 @@ function UserProfile({auth,setAuth,users,setUsers,company,showToast,setTab,handl
 
   const removePhoto = () => {
     const updated = {...auth, avatar: null};
-    setAuth(updated);
-    saveUser(updated);
+    updateAuth(updated);
     setUsers(us => us.map(u => u.id === auth.id ? {...u, avatar: null} : u));
     api.users.update(auth.id, {avatar: null}).catch(e => console.error('photo remove:', e.message));
     showToast("Photo removed");
