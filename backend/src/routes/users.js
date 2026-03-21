@@ -62,6 +62,7 @@ router.post('/', authenticate, async (req, res) => {
         ...data,
         email: data.email.toLowerCase(),
         passwordHash: passwordHash,
+        mustChangePassword: true,
         companyId: req.companyId
       }
     });

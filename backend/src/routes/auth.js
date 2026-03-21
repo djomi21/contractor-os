@@ -49,7 +49,7 @@ router.put('/password', authenticate, async (req, res) => {
     const valid = await bcrypt.compare(currentPassword, req.user.passwordHash);
     if (!valid) return res.status(401).json({ error: 'Current password is incorrect' });
     const passwordHash = await bcrypt.hash(newPassword, 12);
-    await prisma.user.update({ where: { id: req.user.id }, data: { passwordHash } });
+    await prisma.user.update({ where: { id: req.user.id }, data: { passwordHash: passwordHash, mustChangePassword: false } });
     res.json({ message: 'Password updated' });
   } catch (err) {
     res.status(500).json({ error: 'Password update failed' });

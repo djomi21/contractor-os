@@ -76,19 +76,20 @@ model Company {
 
 // ── USERS ────────────────────────────────────────────
 model User {
-  id            Int       @id @default(autoincrement())
-  companyId     Int
-  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  name          String
-  email         String    @unique
-  passwordHash  String
-  phone         String?
-  role          String    @default("Field Tech")   // Owner, Admin, Project Manager, Estimator, Foreman, Bookkeeper, Field Tech, Read Only
-  status        String    @default("active")       // active, invited, disabled
-  avatar        String?   @db.Text
-  lastLogin     DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                  Int       @id @default(autoincrement())
+  companyId           Int
+  company             Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name                String
+  email               String    @unique
+  passwordHash        String
+  phone               String?
+  role                String    @default("Field Tech")
+  status              String    @default("active")
+  avatar              String?   @db.Text
+  mustChangePassword  Boolean   @default(false)
+  lastLogin           DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   @@index([companyId])
   @@index([email])
