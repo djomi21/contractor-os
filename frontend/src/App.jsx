@@ -504,6 +504,7 @@ div:has(>table){overflow-x:auto;-webkit-overflow-scrolling:touch}
   .g6{grid-template-columns:repeat(2,1fr)}
   .spl{grid-template-columns:1fr;height:auto}
   .spl-l{max-height:40vh;border-right:none;border-bottom:1px solid #111826}
+  .spl-r{min-height:50vh}
   .ov{padding:0}
   .mo{border-radius:0;min-height:100vh;border:none}
   .mob-only{display:block}
@@ -511,6 +512,12 @@ div:has(>table){overflow-x:auto;-webkit-overflow-scrolling:touch}
   .desk-flex{display:none!important}
   .mob-drawer-overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99;backdrop-filter:blur(4px)}
   .full-form-grid{grid-template-columns:1fr!important}
+  .jc-grid{grid-template-columns:1fr!important}
+  main div:has(>table){overflow-x:auto;-webkit-overflow-scrolling:touch}
+  main table{min-width:580px}
+  .act-bar{flex-wrap:wrap!important;gap:4px!important}
+  .act-bar .bb{font-size:10px!important;padding:4px 7px!important}
+  .kpi-row{grid-template-columns:repeat(2,1fr)!important}
 }
 @media(max-width:480px){
   .g4{grid-template-columns:1fr}
@@ -1263,7 +1270,7 @@ function Customers({custs,setCusts,invs,ests,projs,showToast,db}) {
                   <div style={{display:"flex",gap:5,marginTop:4}}>{sc.tags.map(t=><span key={t} style={{padding:"2px 7px",borderRadius:10,fontSize:9,fontWeight:700,textTransform:"uppercase",background:TAG_C[t]?.bg||"rgba(74,80,104,.15)",color:TAG_C[t]?.c||"#7a8299"}}>{t}</span>)}</div>
                 </div>
               </div>
-              <div style={{display:"flex",gap:6}}>
+              <div className="act-bar" style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                 <button onClick={()=>openEdit(sc)} className="bb b-gh" style={{padding:"6px 12px",fontSize:11}}><I n="edit" s={12}/>Edit</button>
                 <button onClick={()=>del(sc.id)} className="bb b-rd" style={{padding:"6px 10px",fontSize:11}}><I n="trash" s={12}/></button>
               </div>
@@ -1575,7 +1582,7 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
                   {se.projId&&<span style={{marginLeft:8,padding:"2px 8px",borderRadius:10,fontSize:9,fontWeight:700,background:"rgba(var(--accent-r),var(--accent-g),var(--accent-b),.12)",color:"var(--accent)",cursor:"pointer"}} onClick={()=>setTab("projects")}><I n="projects" s={9}/> {se.projId}</span>}
                 </div>
               </div>
-              <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+              <div className="act-bar" style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                 {se.status==="draft"&&<button onClick={()=>markSt(se.id,"sent")} className="bb b-am" style={{padding:"5px 10px",fontSize:11}}><I n="send" s={11}/>Send</button>}
                 {se.status==="sent"&&<button onClick={()=>markSt(se.id,"approved")} className="bb b-gr" style={{padding:"5px 10px",fontSize:11}}><I n="check" s={11}/>Approve</button>}
                 {se.status==="sent"&&<button onClick={()=>markSt(se.id,"declined")} className="bb b-rd" style={{padding:"5px 9px",fontSize:11}}>Decline</button>}
@@ -1885,7 +1892,7 @@ function Projects({projs,setProjs,custs,showToast,setTab,db}) {
                 <div style={{fontWeight:800,fontSize:18,marginTop:2,letterSpacing:-.3}}>{sp.name}</div>
                 <div style={{fontSize:11,color:"#4a566e",marginTop:2}}>{custs.find(c=>c.id===sp.custId)?.name} · Phase: {sp.phase} · {sp.start} → {sp.end}</div>
               </div>
-              <div style={{display:"flex",gap:6}}>
+              <div className="act-bar" style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                 <button onClick={()=>openEdit(sp)} className="bb b-gh" style={{padding:"6px 11px",fontSize:11}}><I n="edit" s={11}/>Edit</button>
                 <button onClick={()=>setTab("costing")} className="bb b-am" style={{padding:"6px 11px",fontSize:11}}><I n="costing" s={11}/>Costs</button>
               </div>
@@ -2035,7 +2042,7 @@ function JobCosting({projs,custs,hrs,subs,roles}) {
           ))}
         </div>
 
-        <div style={{display:"grid",gridTemplateColumns:"1.3fr 1fr",gap:13}}>
+        <div className="jc-grid" style={{display:"grid",gridTemplateColumns:"1.3fr 1fr",gap:13}}>
           <div style={{background:"#0c0f17",border:"1px solid #111826",borderRadius:12,overflow:"hidden"}}>
             <div style={{padding:"11px 16px",borderBottom:"1px solid #111826",fontWeight:800,fontSize:12}}>Labor Detail — {sp.name.split(" ").slice(0,3).join(" ")}</div>
             {pSubHrs.length===0?<ES icon="employees" text="No hours logged for this project."/>:<>
@@ -2328,7 +2335,7 @@ function Subs({subs,setSubs,hrs,setHrs,projs,roles,showToast,db}) {
                   </div>
                 </div>
               </div>
-              <div style={{display:"flex",gap:6}}>
+              <div className="act-bar" style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                 <button onClick={()=>setHrForm({...blankHr})} className="bb b-am" style={{padding:"6px 11px",fontSize:11}}><I n="clock" s={11}/>Log Hours</button>
                 <button onClick={()=>openEdit(se)} className="bb b-gh" style={{padding:"6px 10px",fontSize:11}}><I n="edit" s={11}/></button>
                 <button onClick={()=>{if(confirm("Delete "+se.name+"?"))del(se.id);}} className="bb b-rd" style={{padding:"6px 10px",fontSize:11}}><I n="trash" s={11}/></button>
@@ -3922,7 +3929,7 @@ function Invoices({invs,setInvs,custs,projs,ests,company,showToast,db}) {
         ))}
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"300px 1fr",height:"calc(100vh - 210px)",border:"1px solid #111826",borderRadius:13,overflow:"hidden"}}>
+      <div className="spl" style={{height:"calc(100vh - 210px)"}}>
         <div className="spl-l">
           <div style={{padding:"10px 12px",borderBottom:"1px solid #111826",flexShrink:0}}>
             <div style={{display:"flex",gap:7,marginBottom:7}}>
@@ -3965,7 +3972,7 @@ function Invoices({invs,setInvs,custs,projs,ests,company,showToast,db}) {
                   <div style={{display:"flex",gap:9,alignItems:"center"}}><span className="mn" style={{fontSize:16,color:"#e2e8f0"}}>{si.number}</span><Chip s={si.status} map={INV_SC}/></div>
                   <div style={{fontSize:11,color:"#4a566e",marginTop:2}}>{custs.find(c=>c.id===si.custId)?.name||"Unassigned"} · Issued {si.issueDate} · Due {si.dueDate}{si.paidDate?` · Paid ${si.paidDate}`:""}</div>
                 </div>
-                <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                <div className="act-bar" style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                   {si.status==="draft"&&<button onClick={()=>setStatus(si.id,"sent")} className="bb b-am" style={{padding:"5px 10px",fontSize:11}}><I n="send" s={11}/>Send</button>}
                   {si.status==="sent"&&<button onClick={()=>setStatus(si.id,"paid")} className="bb b-gr" style={{padding:"5px 10px",fontSize:11}}><I n="check" s={11}/>Mark Paid</button>}
                   {si.status==="sent"&&<button onClick={()=>setStatus(si.id,"overdue")} className="bb b-rd" style={{padding:"5px 9px",fontSize:11}}>Overdue</button>}
