@@ -381,7 +381,7 @@ const Chip=({s,map})=>{const sc=(map||INV_SC)[s]||{bg:"rgba(74,80,104,.15)",c:"#
 const ES=({icon,text})=><div style={{display:"flex",flexDirection:"column",alignItems:"center",padding:"38px 20px",color:"#2d3a52",gap:10,textAlign:"center"}}><I n={icon} s={28}/><div style={{fontSize:13}}>{text}</div></div>;
 const ini=n=>n?.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()||"??";
 const avC=id=>["#3b82f6","#a78bfa","#22c55e","#f5a623","#fb923c","#6366f1","#14b8a6"][id%7];
-const Pr=({v,color})=><div style={{height:5,background:"#0c0f17",borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",borderRadius:3,width:`${v}%`,background:color||"#3b82f6",transition:"width .6s ease"}}/></div>;
+const Pr=({v,color})=><div style={{height:5,background:"#0c0f17",borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",borderRadius:3,width:`${v}%`,background:color||"var(--accent)",transition:"width .6s ease"}}/></div>;
 
 // ── ICONS ──────────────────────────────────────────────────────
 const I=({n,s=18})=>{
@@ -435,27 +435,28 @@ const I=({n,s=18})=>{
 const FONT_URL='https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap';
 const CSS=`
 *{box-sizing:border-box;margin:0;padding:0}
+:root{--accent:#3b82f6;--accent-dark:#1d4ed8;--accent-light:#63b3ed;--accent-r:59;--accent-g:130;--accent-b:246}
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-track{background:#0c0f17}
 ::-webkit-scrollbar-thumb{background:#1e2535;border-radius:2px}
 button{cursor:pointer;border:none;background:none;font-family:inherit;color:inherit}
 input,select,textarea{outline:none;font-family:inherit}
 .nb{transition:all .16s;border-left:2px solid transparent;display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;color:#4a566e;text-align:left;white-space:nowrap;width:100%;font-size:13px;font-weight:600;cursor:pointer}
-.nb:hover{background:rgba(99,179,237,.07)!important;color:#c8d0e0!important}
-.nb.on{background:rgba(99,179,237,.1)!important;border-left-color:#63b3ed!important;color:#63b3ed!important}
+.nb:hover{background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.07)!important;color:#c8d0e0!important}
+.nb.on{background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.1)!important;border-left-color:var(--accent-light)!important;color:var(--accent-light)!important}
 .card{transition:box-shadow .2s,transform .2s}
 .card:hover{box-shadow:0 10px 36px rgba(0,0,0,.45);transform:translateY(-1px)}
 .rh:hover{background:rgba(255,255,255,.023)!important}
 .bb{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-family:inherit;border-radius:8px;cursor:pointer;transition:all .15s;border:none}
-.b-bl{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff}.b-bl:hover{transform:translateY(-1px);box-shadow:0 5px 22px rgba(59,130,246,.45)}
+.b-bl{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff}.b-bl:hover{transform:translateY(-1px);box-shadow:0 5px 22px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.45)}
 .b-gr{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}.b-gr:hover{transform:translateY(-1px);box-shadow:0 5px 20px rgba(34,197,94,.4)}
 .b-am{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}.b-am:hover{transform:translateY(-1px);box-shadow:0 5px 20px rgba(245,158,11,.4)}
-.b-gh{border:1px solid #1e2535!important;color:#7a8299!important;background:transparent}.b-gh:hover{border-color:#3b82f6!important;color:#63b3ed!important}
+.b-gh{border:1px solid #1e2535!important;color:#7a8299!important;background:transparent}.b-gh:hover{border-color:var(--accent)!important;color:var(--accent-light)!important}
 .b-rd{border:1px solid rgba(239,68,68,.3)!important;color:#ef4444!important;background:transparent}.b-rd:hover{background:rgba(239,68,68,.08)!important}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:900;display:flex;align-items:flex-start;justify-content:center;padding:20px;backdrop-filter:blur(8px);overflow-y:auto}
 .mo{background:#0e1119;border:1px solid #1e2535;border-radius:16px;width:100%;box-shadow:0 28px 70px rgba(0,0,0,.7)}
 .inp{background:#0c0f17;border:1px solid #1e2535;color:#dde1ec;border-radius:8px;padding:9px 13px;font-size:13px;width:100%;transition:border-color .18s}
-.inp:focus{border-color:#3b82f6}.inp::placeholder{color:#3a4160}
+.inp:focus{border-color:var(--accent)}.inp::placeholder{color:#3a4160}
 select.inp option{background:#0c0f17}
 .lbl{display:block;font-size:11px;color:#4a566e;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -469,8 +470,8 @@ select.inp option{background:#0c0f17}
 @keyframes gridFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .fu{animation:up .26s ease}
 .sl{cursor:pointer;transition:all .15s;border-left:3px solid transparent}
-.sl:hover{background:rgba(99,179,237,.05)!important;border-left-color:#3b82f6!important}
-.sl.on{background:rgba(99,179,237,.08)!important;border-left-color:#63b3ed!important}
+.sl:hover{background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.05)!important;border-left-color:var(--accent)!important}
+.sl.on{background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.08)!important;border-left-color:var(--accent-light)!important}
 .mn{font-family:'JetBrains Mono',monospace;font-weight:600}
 .stl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.4px;color:#4a566e;margin-bottom:12px}
 .spl{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 88px);border:1px solid #111826;border-radius:14px;overflow:hidden}
@@ -560,13 +561,13 @@ function LoginPage({users, setUsers, onLogin}) {
 
       {/* LEFT — BRANDING PANEL */}
       <div style={{flex:"1 1 380px",minHeight:"min(100vh,500px)",background:"linear-gradient(160deg,#0a0d15 0%,#0e1225 40%,#111a38 100%)",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",padding:"clamp(30px,5vw,60px) clamp(20px,4vw,50px)",position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",inset:0,opacity:.06,backgroundImage:"radial-gradient(circle,#3b82f6 1px,transparent 1px)",backgroundSize:"32px 32px"}}/>
+        <div style={{position:"absolute",inset:0,opacity:.06,backgroundImage:"radial-gradient(circle,var(--accent) 1px,transparent 1px)",backgroundSize:"32px 32px"}}/>
         <div style={{position:"absolute",top:"20%",left:"30%",width:300,height:300,background:"radial-gradient(circle,rgba(59,130,246,.12) 0%,transparent 70%)",borderRadius:"50%",filter:"blur(60px)",animation:"gridFloat 8s ease-in-out infinite"}}/>
         <div style={{position:"absolute",bottom:"15%",right:"20%",width:200,height:200,background:"radial-gradient(circle,rgba(99,102,241,.1) 0%,transparent 70%)",borderRadius:"50%",filter:"blur(50px)",animation:"gridFloat 6s ease-in-out infinite 2s"}}/>
 
         <div style={{position:"relative",zIndex:1,maxWidth:380}}>
           <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:32}}>
-            <div style={{width:48,height:48,borderRadius:12,background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 8px 32px rgba(59,130,246,.35)"}}><I n="wrench" s={22}/></div>
+            <div style={{width:48,height:48,borderRadius:12,background:"linear-gradient(135deg,var(--accent),var(--accent-dark))",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 8px 32px rgba(59,130,246,.35)"}}><I n="wrench" s={22}/></div>
             <div><div style={{fontSize:22,fontWeight:800,color:"#e2e8f0",letterSpacing:-.3}}>ContractorOS</div><div style={{fontSize:9,color:"#4a566e",fontWeight:700,letterSpacing:3,textTransform:"uppercase"}}>Pro · v3</div></div>
           </div>
           <div style={{fontSize:28,fontWeight:800,lineHeight:1.25,color:"#e2e8f0",marginBottom:14,letterSpacing:-.5}}>Run your construction<br/>business from one place.</div>
@@ -574,7 +575,7 @@ function LoginPage({users, setUsers, onLogin}) {
 
           <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
             {["Estimates","Job Costing","Invoicing","Change Orders","Subcontractors","Reports"].map(f=>(
-              <span key={f} style={{fontSize:10,fontWeight:600,padding:"5px 12px",borderRadius:20,background:"rgba(59,130,246,.08)",border:"1px solid rgba(59,130,246,.15)",color:"#63b3ed"}}>{f}</span>
+              <span key={f} style={{fontSize:10,fontWeight:600,padding:"5px 12px",borderRadius:20,background:"rgba(var(--accent-r),var(--accent-g),var(--accent-b),.08)",border:"1px solid rgba(var(--accent-r),var(--accent-g),var(--accent-b),.15)",color:"var(--accent-light)"}}>{f}</span>
             ))}
           </div>
         </div>
@@ -612,7 +613,7 @@ function LoginPage({users, setUsers, onLogin}) {
               </div>
             </div>
 
-            <button onClick={handleLogin} disabled={loading} style={{width:"100%",padding:"13px 0",borderRadius:10,background:loading?"#1e2535":"linear-gradient(135deg,#3b82f6,#1d4ed8)",color:"#fff",fontSize:14,fontWeight:700,border:"none",cursor:loading?"default":"pointer",transition:"all .2s",boxShadow:loading?"none":"0 6px 24px rgba(59,130,246,.35)",fontFamily:"'DM Sans',system-ui,sans-serif",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+            <button onClick={handleLogin} disabled={loading} style={{width:"100%",padding:"13px 0",borderRadius:10,background:loading?"#1e2535":"linear-gradient(135deg,var(--accent),var(--accent-dark))",color:"#fff",fontSize:14,fontWeight:700,border:"none",cursor:loading?"default":"pointer",transition:"all .2s",boxShadow:loading?"none":"0 6px 24px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.35)",fontFamily:"'DM Sans',system-ui,sans-serif",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
               {loading ? (<><div style={{width:16,height:16,border:"2px solid rgba(255,255,255,.3)",borderTop:"2px solid #fff",borderRadius:"50%",animation:"pulse 1s linear infinite"}}/> Signing in…</>) : "Sign In"}
             </button>
           </div>
@@ -626,7 +627,7 @@ function LoginPage({users, setUsers, onLogin}) {
             <div style={{fontSize:10,fontWeight:700,color:"#3a4160",textTransform:"uppercase",letterSpacing:1,marginBottom:10,textAlign:"center"}}>Quick Demo Access</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
               {users.filter(u=>u.status==="active").slice(0,4).map(u=>{
-                const rc=USER_ROLE_C[u.role]||"#3b82f6";
+                const rc=USER_ROLE_C[u.role]||"var(--accent)";
                 return (
                   <button key={u.id} onClick={()=>demoLogin(u)} style={{display:"flex",alignItems:"center",gap:9,padding:"9px 12px",background:"#0c0f17",border:"1px solid #1e2535",borderRadius:9,cursor:"pointer",transition:"all .18s",textAlign:"left"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=rc;e.currentTarget.style.background=rc+"08";}} onMouseLeave={e=>{e.currentTarget.style.borderColor="#1e2535";e.currentTarget.style.background="#0c0f17";}}>
                     <div style={{width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,"+rc+","+rc+"88)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,color:"#fff",flexShrink:0}}>{ini(u.name)}</div>
@@ -679,6 +680,30 @@ export default function App() {
       document.head.appendChild(link);
     }
   }, []);
+
+  // ── Apply theme accent color as CSS variables ──────
+  useEffect(() => {
+    var accent = company.themeAccent || '#3b82f6';
+    // Convert hex to RGB for rgba() usage
+    var r = 59, g = 130, b = 246; // defaults
+    var hex = accent.replace('#', '');
+    if (hex.length === 6) {
+      r = parseInt(hex.substring(0, 2), 16);
+      g = parseInt(hex.substring(2, 4), 16);
+      b = parseInt(hex.substring(4, 6), 16);
+    }
+    // Compute a darker shade (for gradients)
+    var dark = '#' + [r, g, b].map(function(c) { return Math.max(0, Math.floor(c * 0.7)).toString(16).padStart(2, '0'); }).join('');
+    // Compute a lighter shade
+    var light = '#' + [r, g, b].map(function(c) { return Math.min(255, Math.floor(c * 1.3)).toString(16).padStart(2, '0'); }).join('');
+    var root = document.documentElement;
+    root.style.setProperty('--accent', accent);
+    root.style.setProperty('--accent-dark', dark);
+    root.style.setProperty('--accent-light', light);
+    root.style.setProperty('--accent-r', String(r));
+    root.style.setProperty('--accent-g', String(g));
+    root.style.setProperty('--accent-b', String(b));
+  }, [company.themeAccent]);
 
   // ── Restore session + load all data ────────────────
   useEffect(() => {
@@ -820,10 +845,10 @@ export default function App() {
   if (!dataLoaded && auth) return (
     <div style={{display:"flex",height:"100vh",alignItems:"center",justifyContent:"center",fontFamily:"'DM Sans',sans-serif",background:"#080a0f",color:"#dde1ec",flexDirection:"column",gap:16}}>
       <style>{CSS}</style>
-      <div style={{width:40,height:40,borderRadius:10,background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",display:"flex",alignItems:"center",justifyContent:"center"}}><I n="wrench" s={20}/></div>
+      <div style={{width:40,height:40,borderRadius:10,background:"linear-gradient(135deg,var(--accent),var(--accent-dark))",display:"flex",alignItems:"center",justifyContent:"center"}}><I n="wrench" s={20}/></div>
       <div style={{fontSize:14,fontWeight:700}}>Loading ContractorOS…</div>
       <div style={{fontSize:9,color:"#3a4160"}}>v3.1-db</div>
-      <div style={{width:120,height:4,borderRadius:2,background:"#1e2535",overflow:"hidden"}}><div style={{width:"60%",height:"100%",borderRadius:2,background:"#3b82f6",animation:"pulse 1.5s ease-in-out infinite"}}/></div>
+      <div style={{width:120,height:4,borderRadius:2,background:"#1e2535",overflow:"hidden"}}><div style={{width:"60%",height:"100%",borderRadius:2,background:"var(--accent)",animation:"pulse 1.5s ease-in-out infinite"}}/></div>
     </div>
   );
 
@@ -843,7 +868,7 @@ export default function App() {
         ...(typeof window!=="undefined"&&window.innerWidth<=768?{position:"fixed",top:0,bottom:0,left:mobileNav?0:-270,boxShadow:mobileNav?"8px 0 40px rgba(0,0,0,.6)":"none"}:{})
       }}>
         <div style={{padding:"18px 12px 16px",borderBottom:"1px solid #111826",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-          <div style={{width:32,height:32,borderRadius:8,background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><I n="wrench" s={15}/></div>
+          <div style={{width:32,height:32,borderRadius:8,background:"linear-gradient(135deg,var(--accent),var(--accent-dark))",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><I n="wrench" s={15}/></div>
           {(sOpen||mobileNav)&&<div style={{flex:1}}><div style={{fontSize:15,fontWeight:800,color:"#e2e8f0",lineHeight:1}}>ContractorOS</div><div style={{fontSize:8,color:"#2d3a52",fontWeight:700,letterSpacing:2.5,textTransform:"uppercase",marginTop:2}}>Pro · v3</div></div>}
           {mobileNav&&<button onClick={()=>setMobileNav(false)} style={{color:"#4a566e",padding:4}}><I n="x" s={16}/></button>}
         </div>
@@ -860,13 +885,13 @@ export default function App() {
         <div style={{padding:"10px 7px",borderTop:"1px solid #111826",display:"flex",alignItems:"center",gap:8}}>
           <button onClick={()=>{setTab("profile");setMobileNav(false);}} style={{flex:1,display:"flex",alignItems:"center",gap:8,overflow:"hidden",padding:0,borderRadius:6,transition:"all .15s",cursor:"pointer"}} title="View Profile">
             {(sOpen||mobileNav) ? (<>
-              <div style={{width:28,height:28,borderRadius:"50%",background:auth.avatar?`url(${auth.avatar}) center/cover`:`linear-gradient(135deg,${USER_ROLE_C[auth.role]||"#3b82f6"},${USER_ROLE_C[auth.role]||"#3b82f6"}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,color:"#fff",flexShrink:0}}>{!auth.avatar&&ini(auth.name)}</div>
+              <div style={{width:28,height:28,borderRadius:"50%",background:auth.avatar?`url(${auth.avatar}) center/cover`:`linear-gradient(135deg,${USER_ROLE_C[auth.role]||"var(--accent)"},${USER_ROLE_C[auth.role]||"var(--accent)"}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,color:"#fff",flexShrink:0}}>{!auth.avatar&&ini(auth.name)}</div>
               <div style={{overflow:"hidden",textAlign:"left"}}>
                 <div style={{fontSize:11,fontWeight:700,color:"#c8d0e0",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{auth.name}</div>
                 <div style={{fontSize:9,color:"#3a4160",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{auth.role}</div>
               </div>
             </>) : (
-              <div style={{width:28,height:28,borderRadius:"50%",background:auth.avatar?`url(${auth.avatar}) center/cover`:`linear-gradient(135deg,${USER_ROLE_C[auth.role]||"#3b82f6"},${USER_ROLE_C[auth.role]||"#3b82f6"}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,color:"#fff",flexShrink:0,margin:"0 auto"}}>{!auth.avatar&&ini(auth.name)}</div>
+              <div style={{width:28,height:28,borderRadius:"50%",background:auth.avatar?`url(${auth.avatar}) center/cover`:`linear-gradient(135deg,${USER_ROLE_C[auth.role]||"var(--accent)"},${USER_ROLE_C[auth.role]||"var(--accent)"}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,color:"#fff",flexShrink:0,margin:"0 auto"}}>{!auth.avatar&&ini(auth.name)}</div>
             )}
           </button>
           <button onClick={handleLogout} title="Sign Out" style={{color:"#4a566e",padding:7,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:6,transition:"all .15s",flexShrink:0}} onMouseEnter={e=>{e.currentTarget.style.color="#ef4444";}} onMouseLeave={e=>{e.currentTarget.style.color="#4a566e";}}><I n="arrow" s={15}/></button>
@@ -886,7 +911,7 @@ export default function App() {
             {overdue.length>0&&<div className="desk-flex" style={{alignItems:"center",gap:5,padding:"4px 11px",background:"rgba(239,68,68,.07)",border:"1px solid rgba(239,68,68,.22)",borderRadius:16,color:"#ef4444",fontSize:10,fontWeight:700}}><I n="alert" s={11}/>{overdue.length} overdue · {fmt(overdueAmt)}</div>}
             <button onClick={()=>setTab("profile")} style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer",padding:"3px 0",borderRadius:8,transition:"all .15s",border:"none",background:"none",color:"inherit",fontFamily:"inherit"}} title="View Profile">
               <div className="desk-only" style={{textAlign:"right"}}><div style={{fontSize:11,fontWeight:700,color:"#c8d0e0"}}>{auth.name}</div><div style={{fontSize:9,color:"#3a4160"}}>{auth.role}</div></div>
-              <div style={{width:32,height:32,borderRadius:"50%",background:auth.avatar?`url(${auth.avatar}) center/cover`:`linear-gradient(135deg,${USER_ROLE_C[auth.role]||"#3b82f6"},${USER_ROLE_C[auth.role]||"#3b82f6"}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:11,color:"#fff",flexShrink:0}}>{!auth.avatar&&ini(auth.name)}</div>
+              <div style={{width:32,height:32,borderRadius:"50%",background:auth.avatar?`url(${auth.avatar}) center/cover`:`linear-gradient(135deg,${USER_ROLE_C[auth.role]||"var(--accent)"},${USER_ROLE_C[auth.role]||"var(--accent)"}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:11,color:"#fff",flexShrink:0}}>{!auth.avatar&&ini(auth.name)}</div>
             </button>
           </div>
         </header>
@@ -1018,7 +1043,7 @@ function Dashboard({custs,ests,projs,invs,setTab}) {
               return <tr key={p.id} className="rh" style={{borderTop:"1px solid #0e1119",background:i%2===0?"transparent":"rgba(255,255,255,.012)"}}>
                 <td style={{padding:"8px 14px",fontWeight:700,color:"#c8d0e0"}}>{p.name}</td>
                 <td style={{padding:"8px 14px",color:"#7a8299"}}>{c?.name}</td>
-                <td className="mn" style={{padding:"8px 14px",color:"#3b82f6"}}>{fmt(p.contractValue)}</td>
+                <td className="mn" style={{padding:"8px 14px",color:"var(--accent)"}}>{fmt(p.contractValue)}</td>
                 <td className="mn" style={{padding:"8px 14px",color:"#f5a623"}}>{fmt(p.budgetLabor)}</td>
                 <td className="mn" style={{padding:"8px 14px",color:"#6c8ebf"}}>{fmt(p.budgetMaterials)}</td>
                 <td style={{padding:"8px 14px",minWidth:110}}>
@@ -1093,7 +1118,7 @@ function Customers({custs,setCusts,invs,ests,projs,showToast,db}) {
             <button onClick={openNew} className="bb b-bl" style={{padding:"8px 12px",fontSize:12}}><I n="plus" s={12}/>Add</button>
           </div>
           <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-            {TAGS.map(t=><button key={t} onClick={()=>setTagF(t)} style={{padding:"3px 8px",borderRadius:18,fontSize:9,fontWeight:700,border:`1px solid ${tagF===t?"#3b82f6":"#111826"}`,background:tagF===t?"rgba(59,130,246,.14)":"transparent",color:tagF===t?"#63b3ed":"#4a566e"}}>{t}</button>)}
+            {TAGS.map(t=><button key={t} onClick={()=>setTagF(t)} style={{padding:"3px 8px",borderRadius:18,fontSize:9,fontWeight:700,border:`1px solid ${tagF===t?"var(--accent)":"#111826"}`,background:tagF===t?"rgba(var(--accent-r),var(--accent-g),var(--accent-b),.14)":"transparent",color:tagF===t?"var(--accent-light)":"#4a566e"}}>{t}</button>)}
           </div>
         </div>
         <div style={{padding:"5px 12px",borderBottom:"1px solid #111826",fontSize:9,color:"#2d3a52",fontWeight:700,textTransform:"uppercase",letterSpacing:.7,flexShrink:0}}>{filt.length} customers</div>
@@ -1153,7 +1178,7 @@ function Customers({custs,setCusts,invs,ests,projs,showToast,db}) {
           </div>
           <div style={{display:"flex",borderBottom:"1px solid #111826",padding:"0 20px",flexShrink:0}}>
             {["overview","projects","estimates","invoices","notes"].map(t=>(
-              <button key={t} onClick={()=>setDtab(t)} style={{padding:"9px 15px",fontSize:11,fontWeight:700,textTransform:"capitalize",letterSpacing:.3,color:dtab===t?"#63b3ed":"#4a566e",borderBottom:`2px solid ${dtab===t?"#3b82f6":"transparent"}`,transition:"all .14s"}}>{t}</button>
+              <button key={t} onClick={()=>setDtab(t)} style={{padding:"9px 15px",fontSize:11,fontWeight:700,textTransform:"capitalize",letterSpacing:.3,color:dtab===t?"var(--accent-light)":"#4a566e",borderBottom:`2px solid ${dtab===t?"var(--accent)":"transparent"}`,transition:"all .14s"}}>{t}</button>
             ))}
           </div>
           <div style={{flex:1,overflowY:"auto",padding:20}} key={dtab+sc.id}>
@@ -1182,7 +1207,7 @@ function Customers({custs,setCusts,invs,ests,projs,showToast,db}) {
               <div key={p.id} className="card" style={{background:"#0c0f17",border:"1px solid #111826",borderRadius:11,padding:"13px 16px",marginBottom:9}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <div><div style={{fontWeight:700,fontSize:13}}>{p.name}</div><div style={{fontSize:11,color:"#4a566e",marginTop:2}}>Phase: {p.phase}</div></div>
-                  <div style={{display:"flex",gap:8,alignItems:"center"}}><Chip s={p.status} map={PRJ_SC}/><span className="mn" style={{fontSize:14,color:"#3b82f6"}}>{fmt(p.contractValue)}</span></div>
+                  <div style={{display:"flex",gap:8,alignItems:"center"}}><Chip s={p.status} map={PRJ_SC}/><span className="mn" style={{fontSize:14,color:"var(--accent)"}}>{fmt(p.contractValue)}</span></div>
                 </div>
                 <div style={{marginTop:9}}><Pr v={p.progress} color={p.progress>=90?"#22c55e":p.progress>=50?"#3b82f6":"#f5a623"}/></div>
               </div>
@@ -1260,7 +1285,7 @@ function Customers({custs,setCusts,invs,ests,projs,showToast,db}) {
                 <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                   {["VIP","Repeat","Hot Lead","Investor","New","Referral Source"].map(t=>{
                     const on=form.tags.includes(t);
-                    return <button key={t} onClick={()=>toggleTag(t)} style={{padding:"4px 11px",borderRadius:18,fontSize:10,fontWeight:700,border:`1px solid ${on?(TAG_C[t]?.c||"#3b82f6"):"#1e2535"}`,background:on?(TAG_C[t]?.bg||"rgba(59,130,246,.12)"):"transparent",color:on?(TAG_C[t]?.c||"#63b3ed"):"#4a566e"}}>{t}</button>;
+                    return <button key={t} onClick={()=>toggleTag(t)} style={{padding:"4px 11px",borderRadius:18,fontSize:10,fontWeight:700,border:`1px solid ${on?(TAG_C[t]?.c||"var(--accent)"):"#1e2535"}`,background:on?(TAG_C[t]?.bg||"rgba(59,130,246,.12)"):"transparent",color:on?(TAG_C[t]?.c||"#63b3ed"):"#4a566e"}}>{t}</button>;
                   })}
                 </div>
               </div>
@@ -1441,7 +1466,7 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
                 </div>
                 <div style={{fontSize:11,color:"#4a566e",marginTop:2}}>
                   {se.name} · {custs.find(c=>c.id===se.custId)?.name} · {se.date}
-                  {se.projId&&<span style={{marginLeft:8,padding:"2px 8px",borderRadius:10,fontSize:9,fontWeight:700,background:"rgba(59,130,246,.12)",color:"#3b82f6",cursor:"pointer"}} onClick={()=>setTab("projects")}><I n="projects" s={9}/> {se.projId}</span>}
+                  {se.projId&&<span style={{marginLeft:8,padding:"2px 8px",borderRadius:10,fontSize:9,fontWeight:700,background:"rgba(var(--accent-r),var(--accent-g),var(--accent-b),.12)",color:"var(--accent)",cursor:"pointer"}} onClick={()=>setTab("projects")}><I n="projects" s={9}/> {se.projId}</span>}
                 </div>
               </div>
               <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
@@ -1560,7 +1585,7 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
                   </div>
                 </div>
                 {picker&&(
-                  <div style={{border:"1px solid #3b82f6",borderRadius:9,background:"#0a0d15",marginBottom:10,overflow:"hidden",animation:"up .18s ease"}}>
+                  <div style={{border:"1px solid var(--accent)",borderRadius:9,background:"#0a0d15",marginBottom:10,overflow:"hidden",animation:"up .18s ease"}}>
                     <div style={{padding:"8px 10px",borderBottom:"1px solid #1e2535",display:"flex",gap:7,alignItems:"center"}}>
                       <div style={{position:"relative",flex:1}}>
                         <div style={{position:"absolute",left:7,top:"50%",transform:"translateY(-50%)",color:"#3a4160",pointerEvents:"none"}}><I n="search" s={11}/></div>
@@ -1757,7 +1782,7 @@ function Projects({projs,setProjs,custs,showToast,setTab,db}) {
               <div style={{display:"flex",alignItems:"center",gap:6}}>
                 <div style={{flex:1}}><Pr v={p.progress} color={pc}/></div>
                 <span className="mn" style={{fontSize:9,color:"#4a566e"}}>{p.progress}%</span>
-                <span className="mn" style={{fontSize:11,color:"#3b82f6",marginLeft:4}}>{fmt(p.contractValue)}</span>
+                <span className="mn" style={{fontSize:11,color:"var(--accent)",marginLeft:4}}>{fmt(p.contractValue)}</span>
               </div>
             </div>;
           })}
@@ -1913,7 +1938,7 @@ function JobCosting({projs,custs,hrs,subs,roles}) {
   return (
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
       <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-        {projs.map(p=><button key={p.id} onClick={()=>setSelP(p.id)} style={{padding:"7px 13px",borderRadius:9,fontSize:12,fontWeight:700,border:`1px solid ${selP===p.id?"#3b82f6":"#111826"}`,background:selP===p.id?"rgba(59,130,246,.12)":"#0c0f17",color:selP===p.id?"#63b3ed":"#7a8299",transition:"all .14s"}}>{p.name.split(" ").slice(0,3).join(" ")}</button>)}
+        {projs.map(p=><button key={p.id} onClick={()=>setSelP(p.id)} style={{padding:"7px 13px",borderRadius:9,fontSize:12,fontWeight:700,border:`1px solid ${selP===p.id?"var(--accent)":"#111826"}`,background:selP===p.id?"rgba(var(--accent-r),var(--accent-g),var(--accent-b),.12)":"#0c0f17",color:selP===p.id?"var(--accent-light)":"#7a8299",transition:"all .14s"}}>{p.name.split(" ").slice(0,3).join(" ")}</button>)}
       </div>
 
       {sp&&<>
@@ -2052,7 +2077,7 @@ function Materials({mats,setMats,showToast,db}) {
           <input className="inp" value={srch} onChange={e=>setSrch(e.target.value)} placeholder="Search materials…" style={{paddingLeft:27,fontSize:12}}/>
         </div>
         <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-          {cats.map(c=><button key={c} onClick={()=>setCatF(c)} style={{padding:"5px 11px",borderRadius:18,fontSize:10,fontWeight:700,border:`1px solid ${catF===c?"#3b82f6":"#111826"}`,background:catF===c?"rgba(59,130,246,.14)":"#0c0f17",color:catF===c?"#63b3ed":"#4a566e",transition:"all .13s"}}>{c}</button>)}
+          {cats.map(c=><button key={c} onClick={()=>setCatF(c)} style={{padding:"5px 11px",borderRadius:18,fontSize:10,fontWeight:700,border:`1px solid ${catF===c?"var(--accent)":"#111826"}`,background:catF===c?"rgba(var(--accent-r),var(--accent-g),var(--accent-b),.14)":"#0c0f17",color:catF===c?"var(--accent-light)":"#4a566e",transition:"all .13s"}}>{c}</button>)}
         </div>
         <button onClick={openNew} className="bb b-bl" style={{padding:"8px 14px",fontSize:12}}><I n="plus" s={13}/>Add Item</button>
       </div>
@@ -2653,7 +2678,7 @@ function Expenses({expenses,setExpenses,projs,showToast,db}) {
           {projs.map(p=><option key={p.id} value={p.id}>{p.name.split(" ").slice(0,3).join(" ")}</option>)}
         </select>
         <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-          {cats.slice(0,7).map(c=><button key={c} onClick={()=>setCatF(c)} style={{padding:"4px 10px",borderRadius:18,fontSize:10,fontWeight:700,border:`1px solid ${catF===c?"#3b82f6":"#111826"}`,background:catF===c?"rgba(59,130,246,.14)":"#0c0f17",color:catF===c?"#63b3ed":"#4a566e"}}>{c}</button>)}
+          {cats.slice(0,7).map(c=><button key={c} onClick={()=>setCatF(c)} style={{padding:"4px 10px",borderRadius:18,fontSize:10,fontWeight:700,border:`1px solid ${catF===c?"var(--accent)":"#111826"}`,background:catF===c?"rgba(var(--accent-r),var(--accent-g),var(--accent-b),.14)":"#0c0f17",color:catF===c?"var(--accent-light)":"#4a566e"}}>{c}</button>)}
         </div>
         <button onClick={openNew} className="bb b-bl" style={{padding:"8px 14px",fontSize:12,marginLeft:"auto"}}><I n="plus" s={13}/>Add Expense</button>
       </div>
@@ -2825,7 +2850,7 @@ function UserProfile({auth,setAuth,users,setUsers,company,showToast,setTab,handl
             <div style={{width:96,height:96,borderRadius:"50%",border:`3px solid ${rc}`,background:auth.avatar?`url(${auth.avatar}) center/cover`:`linear-gradient(135deg,${rc},${rc}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:30,fontWeight:800,color:"#fff",boxShadow:`0 8px 32px ${rc}30`}}>
               {!auth.avatar && ini(auth.name)}
             </div>
-            <button onClick={()=>fileRef.current?.click()} title="Change photo" style={{position:"absolute",bottom:0,right:0,width:30,height:30,borderRadius:"50%",background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",display:"flex",alignItems:"center",justifyContent:"center",border:"2px solid #0c0f17",cursor:"pointer",transition:"transform .15s",boxShadow:"0 4px 12px rgba(59,130,246,.4)"}} onMouseEnter={e=>{e.currentTarget.style.transform="scale(1.1)";}} onMouseLeave={e=>{e.currentTarget.style.transform="scale(1)";}}>
+            <button onClick={()=>fileRef.current?.click()} title="Change photo" style={{position:"absolute",bottom:0,right:0,width:30,height:30,borderRadius:"50%",background:"linear-gradient(135deg,var(--accent),var(--accent-dark))",display:"flex",alignItems:"center",justifyContent:"center",border:"2px solid #0c0f17",cursor:"pointer",transition:"transform .15s",boxShadow:"0 4px 12px rgba(59,130,246,.4)"}} onMouseEnter={e=>{e.currentTarget.style.transform="scale(1.1)";}} onMouseLeave={e=>{e.currentTarget.style.transform="scale(1)";}}>
               <I n="camera" s={13}/>
             </button>
           </div>
@@ -3493,15 +3518,15 @@ function CompanySetup({company,setCompany,users,setUsers,showToast,db,roles,setR
 
             {/* Custom color picker */}
             <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",background:"#080a0f",borderRadius:10,border:"1px solid #111826"}}>
-              <input type="color" value={form.themeAccent||"#3b82f6"} onChange={e=>{upd("themeAccent",e.target.value);upd("themeName","Custom");}} style={{width:36,height:36,border:"none",borderRadius:8,cursor:"pointer",background:"none",padding:0}}/>
+              <input type="color" value={form.themeAccent||"var(--accent)"} onChange={e=>{upd("themeAccent",e.target.value);upd("themeName","Custom");}} style={{width:36,height:36,border:"none",borderRadius:8,cursor:"pointer",background:"none",padding:0}}/>
               <div>
                 <div style={{fontSize:12,fontWeight:700,color:"#c8d0e0"}}>Custom Color</div>
-                <div className="mn" style={{fontSize:11,color:"#4a566e"}}>{form.themeAccent||"#3b82f6"}</div>
+                <div className="mn" style={{fontSize:11,color:"#4a566e"}}>{form.themeAccent||"var(--accent)"}</div>
               </div>
               <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8}}>
                 <span style={{fontSize:10,color:"#4a566e"}}>Current:</span>
-                <div style={{width:20,height:20,borderRadius:5,background:form.themeAccent||"#3b82f6"}}/>
-                <span className="mn" style={{fontSize:10,color:form.themeAccent||"#3b82f6"}}>{form.themeName||"Ocean Blue"}</span>
+                <div style={{width:20,height:20,borderRadius:5,background:form.themeAccent||"var(--accent)"}}/>
+                <span className="mn" style={{fontSize:10,color:form.themeAccent||"var(--accent)"}}>{form.themeName||"Ocean Blue"}</span>
               </div>
             </div>
           </div>
@@ -3510,14 +3535,14 @@ function CompanySetup({company,setCompany,users,setUsers,showToast,db,roles,setR
           <div style={{background:"#0c0f17",border:"1px solid #111826",borderRadius:14,padding:"24px 28px"}}>
             <div className="stl">Live Preview</div>
             <div style={{display:"flex",gap:14,flexWrap:"wrap",alignItems:"center",marginBottom:16}}>
-              <button style={{padding:"9px 18px",borderRadius:8,background:form.themeAccent||"#3b82f6",color:"#fff",fontWeight:700,fontSize:12,border:"none",fontFamily:"inherit"}}>Primary Button</button>
-              <button style={{padding:"9px 18px",borderRadius:8,background:"transparent",color:form.themeAccent||"#3b82f6",fontWeight:700,fontSize:12,border:"1px solid "+(form.themeAccent||"#3b82f6"),fontFamily:"inherit"}}>Ghost Button</button>
-              <span style={{fontSize:10,fontWeight:700,padding:"4px 11px",borderRadius:10,background:(form.themeAccent||"#3b82f6")+"18",color:form.themeAccent||"#3b82f6"}}>Status Chip</span>
-              <div style={{height:6,width:120,borderRadius:3,background:"#1e2535",overflow:"hidden"}}><div style={{height:"100%",width:"68%",borderRadius:3,background:form.themeAccent||"#3b82f6"}}/></div>
-              <div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:12,height:12,borderRadius:3,background:form.themeAccent||"#3b82f6"}}/><span style={{fontSize:11,color:"#7a8299"}}>Legend item</span></div>
+              <button style={{padding:"9px 18px",borderRadius:8,background:form.themeAccent||"var(--accent)",color:"#fff",fontWeight:700,fontSize:12,border:"none",fontFamily:"inherit"}}>Primary Button</button>
+              <button style={{padding:"9px 18px",borderRadius:8,background:"transparent",color:form.themeAccent||"var(--accent)",fontWeight:700,fontSize:12,border:"1px solid "+(form.themeAccent||"var(--accent)"),fontFamily:"inherit"}}>Ghost Button</button>
+              <span style={{fontSize:10,fontWeight:700,padding:"4px 11px",borderRadius:10,background:(form.themeAccent||"var(--accent)")+"18",color:form.themeAccent||"var(--accent)"}}>Status Chip</span>
+              <div style={{height:6,width:120,borderRadius:3,background:"#1e2535",overflow:"hidden"}}><div style={{height:"100%",width:"68%",borderRadius:3,background:form.themeAccent||"var(--accent)"}}/></div>
+              <div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:12,height:12,borderRadius:3,background:form.themeAccent||"var(--accent)"}}/><span style={{fontSize:11,color:"#7a8299"}}>Legend item</span></div>
             </div>
             <div style={{padding:"12px 16px",background:"#080a0f",borderRadius:8,border:"1px solid #111826",fontSize:11,color:"#4a566e",lineHeight:1.7}}>
-              This preview shows how your accent color will appear across the app. The sidebar active state, buttons, progress bars, charts, and status chips will all use <span style={{color:form.themeAccent||"#3b82f6",fontWeight:700}}>{form.themeName||"Ocean Blue"}</span> as the primary accent.
+              This preview shows how your accent color will appear across the app. The sidebar active state, buttons, progress bars, charts, and status chips will all use <span style={{color:form.themeAccent||"var(--accent)",fontWeight:700}}>{form.themeName||"Ocean Blue"}</span> as the primary accent.
             </div>
           </div>
         </div>
@@ -4102,7 +4127,7 @@ function Reports({invs,projs,custs,subs,hrs,roles,company}) {
                   return <tr key={p.id} className="rh" style={{borderTop:"1px solid #0e1119",background:i%2===0?"transparent":"rgba(255,255,255,.012)"}}>
                     <td style={{padding:"8px 12px",fontWeight:700,color:"#c8d0e0",maxWidth:160,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name}</td>
                     <td style={{padding:"8px 12px",color:"#7a8299"}}>{c?.name}</td>
-                    <td className="mn" style={{padding:"8px 12px",color:"#3b82f6"}}>{fmt(p.contractValue)}</td>
+                    <td className="mn" style={{padding:"8px 12px",color:"var(--accent)"}}>{fmt(p.contractValue)}</td>
                     <td className="mn" style={{padding:"8px 12px",color:"#f5a623"}}>{fmt(p.actualLabor)}</td>
                     <td className="mn" style={{padding:"8px 12px",color:"#6c8ebf"}}>{fmt(p.actualMaterials)}</td>
                     <td className="mn" style={{padding:"8px 12px",color:"#ef4444"}}>{fmt(tot)}</td>
