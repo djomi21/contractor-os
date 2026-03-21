@@ -3169,15 +3169,31 @@ function CompanySetup({company,setCompany,users,setUsers,showToast,db,roles,setR
       console.log('SAVE COMPANY:', data);
       var result = await api.company.update(data);
       console.log('SAVE COMPANY OK:', result);
-      // Use the server response to update state — this is the source of truth
       setCompany(result);
       setForm({...result});
       setDirty(false);
       showToast("Company settings saved");
+      return true;
     } catch(err) {
       console.error('SAVE COMPANY FAIL:', err);
       showToast("Save failed: "+err.message,"error");
+      return false;
     }
+  };
+
+  const sendTestEmail=async ()=>{
+    setTestingEmail(true);
+    try {
+      // Save first so the DB has latest SMTP settings
+      var saved = await saveCompany();
+      if (!saved) { setTestingEmail(false); return; }
+      // Now send test
+      var result = await api.email.test();
+      showToast(result.message || "Test email sent to "+form.smtpUser);
+    } catch(err) {
+      showToast(err.message || "SMTP test failed","error");
+    }
+    setTestingEmail(false);
   };
 
   const STABS=[
@@ -3441,7 +3457,7 @@ function CompanySetup({company,setCompany,users,setUsers,showToast,db,roles,setR
               <div style={{fontSize:11,color:"#4a566e",marginTop:2}}>Configure outgoing email for estimates, invoices, and payment reminders</div>
             </div>
             <div style={{display:"flex",gap:8}}>
-              <button onClick={async ()=>{setTestingEmail(true);try{await saveCompany();await api.email.test();showToast("Test email sent to "+form.smtpUser);}catch(err){showToast("Test failed: "+err.message,"error");}setTestingEmail(false);}} disabled={testingEmail} className="bb b-am" style={{padding:"8px 14px",fontSize:11}}><I n="send" s={12}/>{testingEmail?"Sending...":"Send Test"}</button>
+              <button onClick={sendTestEmail} disabled={testingEmail} className="bb b-am" style={{padding:"8px 14px",fontSize:11}}><I n="send" s={12}/>{testingEmail?"Sending...":"Send Test"}</button>
               <button onClick={saveCompany} className={`bb ${dirty?"b-bl":"b-gh"}`} style={{padding:"8px 18px",fontSize:12}}><I n="check" s={13}/>Save</button>
             </div>
           </div>
