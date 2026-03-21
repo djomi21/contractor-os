@@ -510,6 +510,7 @@ div:has(>table){overflow-x:auto;-webkit-overflow-scrolling:touch}
   .desk-only{display:none!important}
   .desk-flex{display:none!important}
   .mob-drawer-overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99;backdrop-filter:blur(4px)}
+  .full-form-grid{grid-template-columns:1fr!important}
 }
 @media(max-width:480px){
   .g4{grid-template-columns:1fr}
@@ -1658,14 +1659,21 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
       )}
 
       {form&&(
-        <div className="ov" onClick={e=>e.target===e.currentTarget&&setForm(null)}>
-          <div className="mo" style={{maxWidth:820,marginTop:20}}>
-            <div style={{padding:"17px 24px",borderBottom:"1px solid #1e2535",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{position:"fixed",inset:0,zIndex:900,background:"#080a0f",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+          <div style={{padding:"14px 24px",borderBottom:"1px solid #1e2535",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0,background:"#0a0d15"}}>
+            <div style={{display:"flex",alignItems:"center",gap:12}}>
+              <button onClick={()=>setForm(null)} style={{color:"#4a566e",display:"flex",alignItems:"center",gap:5,fontSize:12,fontWeight:600}}><I n="arrow" s={16} /> Back</button>
+              <div style={{width:1,height:20,background:"#1e2535"}}/>
               <div style={{fontSize:17,fontWeight:800}}>{form._id?"Edit Estimate":"New Estimate"}</div>
-              <button onClick={()=>setForm(null)} style={{color:"#4a566e"}}><I n="x"/></button>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 230px",maxHeight:"80vh",overflow:"hidden"}}>
-              <div style={{padding:"18px 22px",overflowY:"auto",borderRight:"1px solid #1e2535"}}>
+            <div className="desk-only" style={{display:"flex",gap:8}}>
+              <button onClick={()=>setForm(null)} className="bb b-gh" style={{padding:"8px 16px",fontSize:12}}>Cancel</button>
+              <button onClick={save} className="bb b-bl" style={{padding:"8px 18px",fontSize:13}}><I n="check" s={14}/>{form._id?"Update":"Create"} Estimate</button>
+            </div>
+          </div>
+          <div style={{flex:1,overflow:"auto"}}>
+            <div className="full-form-grid" style={{display:"grid",gridTemplateColumns:"1fr 260px",maxWidth:1100,margin:"0 auto",minHeight:"100%"}}>
+              <div style={{padding:"22px 28px",borderRight:"1px solid #1e2535"}}>
                 <div className="g2" style={{marginBottom:12}}>
                   <div><label className="lbl">Name *</label><input className="inp" value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder="Kitchen Remodel Bid"/></div>
                   <div><label className="lbl">Customer *</label>
@@ -1769,12 +1777,13 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
                   return <>{renderEditSection("Labor",labLines,"#f5a623","Hours","wrench")}{renderEditSection("Materials",matLines,"#6c8ebf","Qty","materials")}</>;
                 })()}
                 <div style={{marginBottom:12}}><label className="lbl">Notes</label><textarea className="inp" value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} rows={2} style={{resize:"vertical"}}/></div>
-                <div style={{display:"flex",gap:9}}>
+                <div className="desk-only" style={{height:20}}/>
+                <div className="mob-only" style={{display:"flex",gap:9,marginBottom:16}}>
                   <button onClick={()=>setForm(null)} className="bb b-gh" style={{flex:1,padding:"10px",justifyContent:"center"}}>Cancel</button>
-                  <button onClick={save} className="bb b-bl" style={{flex:2,padding:"10px",fontSize:13,justifyContent:"center"}}><I n="check" s={13}/>{form._id?"Update":"Create"} Estimate</button>
+                  <button onClick={save} className="bb b-bl" style={{flex:2,padding:"10px",fontSize:13,justifyContent:"center"}}><I n="check" s={13}/>{form._id?"Update":"Create"}</button>
                 </div>
               </div>
-              <div style={{padding:"16px 14px",background:"#080a0f",overflowY:"auto"}}>
+              <div style={{padding:"18px 16px",background:"#0a0d15",overflowY:"auto",borderLeft:"1px solid #1e2535"}}>
                 <div className="stl">Preview</div>
                 <div style={{background:"#0c0f17",border:"1px solid #111826",borderRadius:9,overflow:"hidden"}}>
                   {[
