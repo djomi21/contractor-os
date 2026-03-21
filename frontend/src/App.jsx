@@ -753,7 +753,6 @@ export default function App() {
     {id:"expenses", label:"Expenses",   icon:"expense"},
     {id:"materials",label:"Materials",  icon:"materials"},
     {id:"subs",     label:"Subcontractors",icon:"employees"},
-    {id:"roles",    label:"Labor Roles", icon:"wrench"},
     {id:"invoices", label:"Invoices",   icon:"invoices"},
     {id:"reports",  label:"Reports",    icon:"reports"},
     {id:"company",  label:"Company Setup",icon:"settings"},
@@ -900,7 +899,6 @@ export default function App() {
           {tab==="expenses"  && <Expenses   {...sh}/>}
           {tab==="materials" && <Materials  {...sh}/>}
           {tab==="subs"      && <Subs       {...sh}/>}
-          {tab==="roles"     && <LaborRoles {...sh}/>}
           {tab==="invoices"  && <Invoices   {...sh}/>}
           {tab==="reports"   && <Reports    {...sh}/>}
           {tab==="company"   && <CompanySetup {...sh}/>}
@@ -2157,6 +2155,7 @@ function Subs({subs,setSubs,hrs,setHrs,projs,roles,showToast,db}) {
     else{db.subs.create({...data,id:uid()});showToast("Added");}
     setForm(null);
   };
+  const del=id=>{db.subs.remove(id);if(sel===id)setSel(null);showToast("Subcontractor removed");};
 
   const blankHr={projId:projs[0]?.id||"",date:tod(),hours:"8",desc:"",approved:false};
   const logHrs=()=>{
@@ -2219,6 +2218,7 @@ function Subs({subs,setSubs,hrs,setHrs,projs,roles,showToast,db}) {
               <div style={{display:"flex",gap:6}}>
                 <button onClick={()=>setHrForm({...blankHr})} className="bb b-am" style={{padding:"6px 11px",fontSize:11}}><I n="clock" s={11}/>Log Hours</button>
                 <button onClick={()=>openEdit(se)} className="bb b-gh" style={{padding:"6px 10px",fontSize:11}}><I n="edit" s={11}/></button>
+                <button onClick={()=>{if(confirm("Delete "+se.name+"?"))del(se.id);}} className="bb b-rd" style={{padding:"6px 10px",fontSize:11}}><I n="trash" s={11}/></button>
               </div>
             </div>
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -3007,7 +3007,7 @@ function ToggleSwitch({defaultOn=false,on:controlledOn,onChange}) {
 // ══════════════════════════════════════════════════════════════
 // COMPANY SETUP
 // ══════════════════════════════════════════════════════════════
-function CompanySetup({company,setCompany,users,setUsers,showToast,db}) {
+function CompanySetup({company,setCompany,users,setUsers,showToast,db,roles,setRoles}) {
   const [stab, setStab] = useState("users");
   const [form, setForm] = useState({...company});
   const [dirty, setDirty] = useState(false);
@@ -3048,6 +3048,7 @@ function CompanySetup({company,setCompany,users,setUsers,showToast,db}) {
   const STABS=[
     {id:"users",label:"Users & Roles",icon:"customers"},
     {id:"roles",label:"Role Permissions",icon:"shield"},
+    {id:"labor",label:"Labor Roles",icon:"wrench"},
     {id:"email",label:"Email & Notifications",icon:"bell"},
     {id:"theme",label:"Theme & Branding",icon:"palette"},
     {id:"company",label:"Company Info",icon:"settings"},
@@ -3225,6 +3226,11 @@ function CompanySetup({company,setCompany,users,setUsers,showToast,db}) {
             })}
           </div>
         </div>
+      )}
+
+      {/* ── LABOR ROLES TAB ── */}
+      {stab==="labor"&&(
+        <LaborRoles roles={roles} setRoles={setRoles} showToast={showToast} db={db}/>
       )}
 
       {/* ── COMPANY INFO TAB ── */}
