@@ -24,17 +24,17 @@ async function main() {
   });
   console.log('  + Company: ' + company.name);
 
- // ── Admin user ─────────────────────────────────────
+  // ── Owner user ─────────────────────────────────────
   var passwordHash = await bcrypt.hash('contractor123', 12);
   var existing = await prisma.user.findUnique({ where: { email: 'jason@jbconstruction.com' } });
   if (!existing) {
     await prisma.user.create({
-      data: { companyId: company.id, name: 'Jason Braddock', email: 'jason@jbconstruction.com', passwordHash: passwordHash, phone: '(512)555-0199', role: 'Admin', status: 'active', lastLogin: new Date() }
+      data: { companyId: company.id, name: 'Jason Braddock', email: 'jason@jbconstruction.com', passwordHash: passwordHash, phone: '(512)555-0199', role: 'Owner', status: 'active', lastLogin: new Date() }
     });
-    console.log('  + Admin user (jason@jbconstruction.com / contractor123)');
+    console.log('  + Owner user (jason@jbconstruction.com / contractor123)');
   } else {
     await prisma.user.update({ where: { email: 'jason@jbconstruction.com' }, data: { passwordHash: passwordHash } });
-    console.log('  ~ Admin password reset');
+    console.log('  ~ Owner password reset');
   }
 
   // ── Customers (7) ──────────────────────────────────

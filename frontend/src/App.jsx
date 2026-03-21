@@ -767,7 +767,7 @@ export default function App() {
   // Components call db.custs.create(item), db.custs.update(id, changes), db.custs.remove(id)
   const strip = (obj) => {
     var c = {...obj};
-    delete c.createdAt; delete c.updatedAt; delete c.company; delete c.customer;
+    delete c._id; delete c.createdAt; delete c.updatedAt; delete c.company; delete c.customer;
     delete c.project; delete c.estimate; delete c.sub; delete c.timeEntries;
     delete c.invoices; delete c.estimates; delete c.projects; delete c.changeOrders; delete c.expenses;
     return c;
@@ -775,18 +775,21 @@ export default function App() {
 
   const makeDb = (rawSet, apiRes) => ({
     create: (item) => {
+      console.log('DB CREATE:', item);
       rawSet(prev => [item, ...prev]);
       var c = strip(item); if (typeof c.id === 'number') delete c.id;
-      apiRes.create(c).catch(e => console.error('db.create:', e.message));
+      apiRes.create(c).then(r => console.log('DB CREATE OK:', r)).catch(e => console.error('DB CREATE FAIL:', e.message));
     },
     update: (id, changes) => {
+      console.log('DB UPDATE:', id, changes);
       rawSet(prev => prev.map(x => x.id === id ? {...x, ...changes} : x));
       var c = strip(changes); delete c.id;
-      apiRes.update(id, c).catch(e => console.error('db.update:', e.message));
+      apiRes.update(id, c).then(r => console.log('DB UPDATE OK:', r)).catch(e => console.error('DB UPDATE FAIL:', e.message));
     },
     remove: (id) => {
+      console.log('DB REMOVE:', id);
       rawSet(prev => prev.filter(x => x.id !== id));
-      apiRes.remove(id).catch(e => console.error('db.remove:', e.message));
+      apiRes.remove(id).then(r => console.log('DB REMOVE OK:', r)).catch(e => console.error('DB REMOVE FAIL:', e.message));
     },
   });
 
@@ -812,6 +815,7 @@ export default function App() {
       <style>{CSS}</style>
       <div style={{width:40,height:40,borderRadius:10,background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",display:"flex",alignItems:"center",justifyContent:"center"}}><I n="wrench" s={20}/></div>
       <div style={{fontSize:14,fontWeight:700}}>Loading ContractorOS…</div>
+      <div style={{fontSize:9,color:"#3a4160"}}>v3.1-db</div>
       <div style={{width:120,height:4,borderRadius:2,background:"#1e2535",overflow:"hidden"}}><div style={{width:"60%",height:"100%",borderRadius:2,background:"#3b82f6",animation:"pulse 1.5s ease-in-out infinite"}}/></div>
     </div>
   );
