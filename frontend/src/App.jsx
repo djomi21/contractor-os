@@ -2780,7 +2780,9 @@ function UserProfile({auth,setAuth,users,setUsers,company,showToast,setTab,handl
       const dataUrl = ev.target.result;
       const updated = {...auth, avatar: dataUrl};
       setAuth(updated);
+      saveUser(updated);
       setUsers(us => us.map(u => u.id === auth.id ? {...u, avatar: dataUrl} : u));
+      api.users.update(auth.id, {avatar: dataUrl}).catch(e => console.error('photo save:', e.message));
       showToast("Photo updated");
     };
     reader.readAsDataURL(file);
@@ -2789,7 +2791,9 @@ function UserProfile({auth,setAuth,users,setUsers,company,showToast,setTab,handl
   const removePhoto = () => {
     const updated = {...auth, avatar: null};
     setAuth(updated);
+    saveUser(updated);
     setUsers(us => us.map(u => u.id === auth.id ? {...u, avatar: null} : u));
+    api.users.update(auth.id, {avatar: null}).catch(e => console.error('photo remove:', e.message));
     showToast("Photo removed");
   };
 
@@ -2996,7 +3000,7 @@ function ToggleSwitch({defaultOn=false,on:controlledOn,onChange}) {
 // ══════════════════════════════════════════════════════════════
 // COMPANY SETUP
 // ══════════════════════════════════════════════════════════════
-function CompanySetup({company,setCompany,users,setUsers,showToast}) {
+function CompanySetup({company,setCompany,users,setUsers,showToast,db}) {
   const [stab, setStab] = useState("users");
   const [form, setForm] = useState({...company});
   const [dirty, setDirty] = useState(false);
@@ -3061,28 +3065,28 @@ function CompanySetup({company,setCompany,users,setUsers,showToast}) {
     if(!uForm.name.trim()){showToast("Name required","error");return;}
     if(!uForm.email.trim()){showToast("Email required","error");return;}
     if(uForm._id){
-      setUsers(us=>us.map(u=>u.id===uForm._id?{...u,name:uForm.name,email:uForm.email,phone:uForm.phone,role:uForm.role,status:uForm.status}:u));
+      db.users.update(uForm._id,{name:uForm.name,email:uForm.email,phone:uForm.phone,role:uForm.role,status:uForm.status});
       showToast("User updated");
     } else {
       const nu={...uForm,id:uid(),lastLogin:null,createdAt:tod()};
-      setUsers(us=>[...us,nu]);
+      db.users.create(nu);
       showToast("User invited");
     }
     setUForm(null);
   };
 
   const toggleStatus=(id)=>{
-    setUsers(us=>us.map(u=>{
-      if(u.id!==id) return u;
-      if(u.role==="Owner"){showToast("Cannot disable Owner","error");return u;}
-      return {...u,status:u.status==="active"?"disabled":"active"};
-    }));
+    const u=users.find(x=>x.id===id);
+    if(!u) return;
+    if(u.role==="Owner"){showToast("Cannot disable Owner","error");return;}
+    const newSt=u.status==="active"?"disabled":"active";
+    db.users.update(id,{status:newSt});
   };
 
   const delUser=(id)=>{
     const u=users.find(x=>x.id===id);
     if(u?.role==="Owner"){showToast("Cannot remove Owner","error");return;}
-    setUsers(us=>us.filter(x=>x.id!==id));
+    db.users.remove(id);
     showToast("User removed");
   };
 
