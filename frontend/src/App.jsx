@@ -2291,7 +2291,7 @@ function Materials({mats,setMats,showToast,db}) {
 // ══════════════════════════════════════════════════════════════
 // SUBCONTRACTORS
 // ══════════════════════════════════════════════════════════════
-function Subs({subs,setSubs,hrs,setHrs,projs,roles,showToast,db}) {
+function Subs({subs,setSubs,hrs,setHrs,projs,roles,showToast,db,auth}) {
   const [sel,setSel]=useState(subs[0]?.id||null);
   const [form,setForm]=useState(null);
   const [hrForm,setHrForm]=useState(null);
@@ -2323,6 +2323,13 @@ function Subs({subs,setSubs,hrs,setHrs,projs,roles,showToast,db}) {
   };
 
   const formPreview=hrForm&&se?{billed:(Number(hrForm.hours)||0)*se.billableRate,cost:(Number(hrForm.hours)||0)*getBurdenedRate(roles,se.role,se.hourlyWage)}:{billed:0,cost:0};
+
+  const canApprove = auth && ["Owner","Admin","Foreman"].includes(auth.role);
+  const toggleApprove=(hId,current)=>{
+    if(!canApprove) return;
+    db.hrs.update(hId,{approved:!current});
+    showToast(!current?"Hours approved":"Approval revoked");
+  };
 
   return (
     <div className="spl">
@@ -2406,7 +2413,11 @@ function Subs({subs,setSubs,hrs,setHrs,projs,roles,showToast,db}) {
                         <td style={{padding:"7px 12px",color:"#7a8299",maxWidth:200,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.desc}</td>
                         <td className="mn" style={{padding:"7px 12px",color:"#22c55e"}}>{fmt(billed)}</td>
                         <td className="mn" style={{padding:"7px 12px",color:"#ef4444"}}>{fmt(cost)}</td>
-                        <td style={{padding:"7px 12px"}}><span style={{padding:"2px 7px",borderRadius:10,fontSize:8,fontWeight:700,textTransform:"uppercase",background:h.approved?"rgba(34,197,94,.1)":"rgba(245,166,35,.08)",color:h.approved?"#22c55e":"#f5a623"}}>{h.approved?"Approved":"Pending"}</span></td>
+                        <td style={{padding:"7px 12px"}}>{canApprove?(
+                          <button onClick={()=>toggleApprove(h.id,h.approved)} style={{padding:"2px 9px",borderRadius:10,fontSize:8,fontWeight:700,textTransform:"uppercase",background:h.approved?"rgba(34,197,94,.1)":"rgba(245,166,35,.08)",color:h.approved?"#22c55e":"#f5a623",border:h.approved?"1px solid rgba(34,197,94,.25)":"1px solid rgba(245,166,35,.2)",cursor:"pointer",transition:"all .15s"}}>{h.approved?"Approved":"Approve"}</button>
+                        ):(
+                          <span style={{padding:"2px 7px",borderRadius:10,fontSize:8,fontWeight:700,textTransform:"uppercase",background:h.approved?"rgba(34,197,94,.1)":"rgba(245,166,35,.08)",color:h.approved?"#22c55e":"#f5a623"}}>{h.approved?"Approved":"Pending"}</span>
+                        )}</td>
                       </tr>;
                     })}
                   </tbody>
