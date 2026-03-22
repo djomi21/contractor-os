@@ -1886,7 +1886,7 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
 // ══════════════════════════════════════════════════════════════
 // PROJECTS
 // ══════════════════════════════════════════════════════════════
-function Projects({projs,setProjs,custs,showToast,setTab,db}) {
+function Projects({projs,setProjs,custs,ests,cos,invs,showToast,setTab,db}) {
   const [sel,  setSel]  = useState(projs[0]?.id||null);
   const [form, setForm] = useState(null);
   const sp=projs.find(p=>p.id===sel)||null;
@@ -1902,6 +1902,34 @@ function Projects({projs,setProjs,custs,showToast,setTab,db}) {
     if(form._id){var ch={...data};delete ch._id;db.projs.update(form._id,ch);showToast("Updated");}
     else{const id=nxtNum(projs,"PRJ");const np={...data,id};db.projs.create(np);setSel(id);showToast(id+" created");}
     setForm(null);
+  };
+
+  const markComplete=(proj)=>{
+    if(!confirm("Mark \""+proj.name+"\" as complete?\n\nThis will create a final invoice with estimate line items + approved change orders.")) return;
+    db.projs.update(proj.id,{status:"complete",phase:"Complete",progress:100});
+    var lineItems=[];var lineId=1;
+    var est=(ests||[]).find(function(e){return e.id===proj.estId;});
+    if(est&&est.lineItems){
+      est.lineItems.forEach(function(li){
+        lineItems.push({id:lineId++,description:li.description,qty:li.qty,unitPrice:li.unitPrice,isMaterial:li.isMaterial,section:"estimate"});
+      });
+    }
+    var projCOs=(cos||[]).filter(function(c){return c.projId===proj.id&&c.status==="approved";});
+    projCOs.forEach(function(co){
+      if(co.laborAmt>0) lineItems.push({id:lineId++,description:"CO "+co.number+" — "+co.description+" (Labor)",qty:1,unitPrice:co.laborAmt,isMaterial:false,section:"changeorder",coNumber:co.number});
+      if(co.materialAmt>0) lineItems.push({id:lineId++,description:"CO "+co.number+" — "+co.description+" (Materials)",qty:1,unitPrice:co.materialAmt,isMaterial:true,section:"changeorder",coNumber:co.number});
+    });
+    if(lineItems.length>0){
+      var invId=nxtNum(invs||[],"INV");
+      var taxRate=est?est.taxRate:FL_TAX;
+      var discount=est?(est.discount||0):0;
+      var depositType=est?(est.depositType||"none"):"none";
+      var depositValue=est?(Number(est.depositValue)||0):0;
+      db.invs.create({id:invId,number:invId,custId:proj.custId,projId:proj.id,estId:proj.estId||null,status:"draft",issueDate:tod(),dueDate:addD(tod(),30),discount:discount,depositType:depositType,depositValue:depositValue,paidDate:null,taxRate:taxRate,notes:"Final invoice — "+proj.name+(projCOs.length>0?" (includes "+projCOs.length+" change order"+(projCOs.length>1?"s":"")+")" :""),lineItems:lineItems});
+      showToast("Project completed — "+invId+" created");
+    } else {
+      showToast("Project completed");
+    }
   };
 
   const laborVar=sp?sp.actualLabor-sp.budgetLabor:0;
@@ -1950,6 +1978,7 @@ function Projects({projs,setProjs,custs,showToast,setTab,db}) {
                 <div style={{fontSize:11,color:"#4a566e",marginTop:2}}>{custs.find(c=>c.id===sp.custId)?.name} · Phase: {sp.phase} · {sp.start} → {sp.end}</div>
               </div>
               <div className="act-bar" style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                {sp.status==="active"&&<button onClick={()=>markComplete(sp)} className="bb b-gr" style={{padding:"6px 11px",fontSize:11}}><I n="check" s={11}/>Mark Complete</button>}
                 <button onClick={()=>openEdit(sp)} className="bb b-gh" style={{padding:"6px 11px",fontSize:11}}><I n="edit" s={11}/>Edit</button>
                 <button onClick={()=>setTab("costing")} className="bb b-am" style={{padding:"6px 11px",fontSize:11}}><I n="costing" s={11}/>Costs</button>
               </div>
@@ -2721,25 +2750,12 @@ function ChangeOrders({cos,setCos,projs,setProjs,custs,invs,setInvs,showToast,se
   };
 
   const approve=co=>{
-    // 1. Update CO status
     db.cos.update(co.id,{status:"approved",approvedBy:"Owner",approvedDate:tod()});
-    // 2. Update project budget
     var proj=projs.find(p=>p.id===co.projId);
     if(proj){
       db.projs.update(co.projId,{contractValue:proj.contractValue+co.totalAmt,budgetLabor:proj.budgetLabor+co.laborAmt,budgetMaterials:proj.budgetMaterials+co.materialAmt});
     }
-    // 3. Create invoice for the change order cost
-    var invId=nxtNum(invs,"INV");
-    var cust=proj?custs.find(c=>c.id===proj.custId):null;
-    var lineItems=[];
-    if(co.laborAmt>0) lineItems.push({id:1,description:"Change Order "+co.number+" — Labor: "+co.description,qty:1,unitPrice:co.laborAmt,isMaterial:false});
-    if(co.materialAmt>0) lineItems.push({id:2,description:"Change Order "+co.number+" — Materials: "+co.description,qty:1,unitPrice:co.materialAmt,isMaterial:true});
-    if(lineItems.length>0){
-      db.invs.create({id:invId,number:invId,custId:cust?cust.id:null,projId:co.projId,estId:null,status:"draft",issueDate:tod(),dueDate:addD(tod(),30),discount:0,depositType:"none",depositValue:0,paidDate:null,taxRate:FL_TAX,notes:"Auto-generated from Change Order "+co.number,lineItems:lineItems});
-      showToast("Approved — project updated & "+invId+" created");
-    } else {
-      showToast("Approved — project updated");
-    }
+    showToast("Approved — project budget updated");
   };
   const decline=id=>{db.cos.update(id,{status:"declined"});showToast("Declined");};
   const del=id=>{db.cos.remove(id);showToast("Removed");};
@@ -4142,12 +4158,16 @@ function Invoices({invs,setInvs,custs,projs,ests,mats,roles,company,showToast,db
             </div>
             <div style={{flex:1,overflowY:"auto",padding:"14px 20px"}}>
               {(()=>{
-                const labItems=si.lineItems.filter(l=>!l.isMaterial);
-                const matItems=si.lineItems.filter(l=>l.isMaterial);
+                const estItems=si.lineItems.filter(l=>l.section!=="changeorder");
+                const coItems=si.lineItems.filter(l=>l.section==="changeorder");
+                const labItems=estItems.filter(l=>!l.isMaterial);
+                const matItems=estItems.filter(l=>l.isMaterial);
+                const coLabItems=coItems.filter(l=>!l.isMaterial);
+                const coMatItems=coItems.filter(l=>l.isMaterial);
                 const renderSection=(title,items,color,qtyLabel)=>(
                   items.length>0&&<div style={{border:"1px solid #111826",borderRadius:11,overflow:"hidden",marginBottom:12}}>
                     <div style={{padding:"8px 14px",background:"#0a0d15",borderBottom:"1px solid #111826",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                      <div style={{fontWeight:700,fontSize:11,color}}><I n={title==="Labor"?"wrench":"materials"} s={12}/> {title}</div>
+                      <div style={{fontWeight:700,fontSize:11,color}}><I n={title==="Labor"||title==="CO Labor"?"wrench":"materials"} s={12}/> {title}</div>
                       <span className="mn" style={{fontSize:11,color}}>{fmt(items.reduce((s,l)=>s+l.qty*l.unitPrice,0))}</span>
                     </div>
                     <table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}>
@@ -4166,7 +4186,20 @@ function Invoices({invs,setInvs,custs,projs,ests,mats,roles,company,showToast,db
                     </table>
                   </div>
                 );
-                return <>{renderSection("Labor",labItems,"#f5a623","Hours")}{renderSection("Materials",matItems,"#6c8ebf","Qty")}</>;
+                return <>
+                  {(labItems.length>0||matItems.length>0)&&<div style={{marginBottom:4}}><div className="stl">Estimate</div></div>}
+                  {renderSection("Labor",labItems,"#f5a623","Hours")}
+                  {renderSection("Materials",matItems,"#6c8ebf","Qty")}
+                  {coItems.length>0&&(<>
+                    <div style={{marginTop:8,marginBottom:4,paddingTop:10,borderTop:"1px dashed #1e2535"}}><div className="stl" style={{color:"#a78bfa"}}>Change Orders</div></div>
+                    {renderSection("CO Labor",coLabItems,"#a78bfa","Qty")}
+                    {renderSection("CO Materials",coMatItems,"#8b5cf6","Qty")}
+                    <div style={{background:"rgba(167,139,250,.06)",border:"1px solid rgba(167,139,250,.15)",borderRadius:9,padding:"8px 12px",marginBottom:12,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                      <span style={{fontSize:11,fontWeight:700,color:"#a78bfa"}}>Change Orders Total</span>
+                      <span className="mn" style={{fontSize:13,color:"#a78bfa"}}>{fmt(coItems.reduce(function(s,l){return s+l.qty*l.unitPrice;},0))}</span>
+                    </div>
+                  </>)}
+                </>;
               })()}
               <div style={{border:"1px solid #111826",borderRadius:11,overflow:"hidden",marginBottom:12}}>
                 <div style={{padding:"10px 15px",background:"#0a0d15"}}>
