@@ -391,6 +391,7 @@ ${bodyHtml}
 const ROLE_C={};
 const _rc=["#f5a623","#6366f1","#3b82f6","#14b8a6","#78716c","#ec4899","#fb923c","#a78bfa","#ef4444","#22c55e","#f59e0b","#94a3b8","#06b6d4","#84cc16","#e879f9","#facc15","#0ea5e9","#d946ef","#f97316","#10b981"];
 SD_ROLES.forEach((r,i)=>{ROLE_C[r.title]=_rc[i%_rc.length];});
+const MGMT_ROLES=new Set(["Project Manager","Office Manager","Estimator","Bookkeeper","Accounts Payable","Accounts Receivable","Receptionist","HR Coordinator","Safety Officer","Quality Control Inspector","Dispatcher","Warehouse Manager","Purchasing Agent","Marketing Coordinator","Business Development","Controller / CFO","Operations Manager","Field Supervisor","Permit Coordinator","IT / Tech Support","Architect","Interior Designer","Structural Engineer","Surveyor","Site Superintendent"]);
 const CAT_C={"Lumber":"#f5a623","Drywall":"#94a3b8","Flooring":"#22c55e","Tile":"#14b8a6","Paint":"#ec4899","Plumbing":"#3b82f6","Electrical":"#f59e0b","Decking":"#a78bfa","Concrete":"#78716c","Insulation":"#fb923c","Doors & Windows":"#6366f1"};
 const TAG_C={"VIP":{bg:"rgba(245,166,35,.14)",c:"#f5a623"},"Repeat":{bg:"rgba(99,179,237,.14)",c:"#63b3ed"},"Hot Lead":{bg:"rgba(239,68,68,.12)",c:"#ef4444"},"Investor":{bg:"rgba(166,139,250,.12)",c:"#a78bfa"},"New":{bg:"rgba(34,197,94,.1)",c:"#22c55e"},"Referral Source":{bg:"rgba(251,146,60,.1)",c:"#fb923c"}};
 const INV_SC={"draft":{bg:"rgba(74,80,104,.18)",c:"#7a8299",label:"Draft"},"sent":{bg:"rgba(245,166,35,.12)",c:"#f5a623",label:"Sent"},"paid":{bg:"rgba(34,197,94,.12)",c:"#22c55e",label:"Paid"},"overdue":{bg:"rgba(239,68,68,.12)",c:"#ef4444",label:"Overdue"},"void":{bg:"rgba(99,102,241,.1)",c:"#6366f1",label:"Void"}};
@@ -2475,15 +2476,15 @@ function Subs({subs,setSubs,hrs,setHrs,projs,roles,showToast,db,auth}) {
               </div>
               <div className="g3">
                 <div><label className="lbl">Type</label>
-                  <select className="inp" value={form.employeeType||"1099"} onChange={e=>setForm(f=>({...f,employeeType:e.target.value}))}>
+                  <select className="inp" value={form.employeeType||"1099"} onChange={e=>{var t=e.target.value;var filtered=roles.filter(function(r){return t==="W2"?MGMT_ROLES.has(r.title):!MGMT_ROLES.has(r.title);});setForm(f=>({...f,employeeType:t,role:filtered[0]?.title||f.role}));}}>
                     <option value="W2">W-2 Employee</option>
                     <option value="1099">1099 Contractor</option>
                     <option value="sub_company">Sub Company</option>
                   </select>
                 </div>
-                <div><label className="lbl">Labor Role</label>
+                <div><label className="lbl">{form.employeeType==="W2"?"Position":"Trade / Role"}</label>
                   <select className="inp" value={form.role} onChange={e=>setForm(f=>({...f,role:e.target.value}))}>
-                    {roles.map(r=><option key={r.id} value={r.title}>{r.title}</option>)}
+                    {roles.filter(function(r){return form.employeeType==="W2"?MGMT_ROLES.has(r.title):!MGMT_ROLES.has(r.title);}).map(r=><option key={r.id} value={r.title}>{r.title}</option>)}
                   </select>
                 </div>
                 <div><label className="lbl">Status</label>
