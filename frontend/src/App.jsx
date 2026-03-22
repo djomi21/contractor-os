@@ -3830,13 +3830,14 @@ function EmailSendModal({type,docNumber,customer,total,dueDate,project,company,o
 // ══════════════════════════════════════════════════════════════
 // INVOICES
 // ══════════════════════════════════════════════════════════════
-function Invoices({invs,setInvs,custs,projs,ests,company,showToast,db}) {
+function Invoices({invs,setInvs,custs,projs,ests,mats,roles,company,showToast,db}) {
   const [sel,  setSel]  = useState(invs[0]?.id||null);
   const [stF,  setStF]  = useState("all");
   const [newMd,setNewMd]= useState(null);
   const [srcId,setSrcId]= useState("");
   const [emailMd, setEmailMd] = useState(false);
-  const [editForm, setEditForm] = useState(null); // full-screen edit mode
+  const [editForm, setEditForm] = useState(null);
+  const [invPicker, setInvPicker] = useState(null); // full-screen edit mode
   const si=invs.find(i=>i.id===sel)||null;
   const siC=si?calcInv(si.lineItems,si.taxRate,si.discount||0):{sub:0,lab:0,mat:0,discountPct:0,discAmt:0,discSub:0,tax:0,total:0};
 
@@ -3854,10 +3855,22 @@ function Invoices({invs,setInvs,custs,projs,ests,company,showToast,db}) {
   const setStatus=(id,st)=>db.invs.update(id,{status:st,paidDate:st==="paid"?tod():null});
 
   // Edit form helpers
-  const openEdit=(inv)=>setEditForm({...inv,_id:inv.id,custId:inv.custId||"",discount:inv.discount||0});
+  const openEdit=(inv)=>{setEditForm({...inv,_id:inv.id,custId:inv.custId||"",discount:inv.discount||0});setInvPicker(null);};
   const addEditLine=()=>setEditForm(f=>({...f,lineItems:[...f.lineItems,{id:uid(),description:"",qty:1,unitPrice:0,isMaterial:false}]}));
   const updEditLine=(lid,fld,v)=>setEditForm(f=>({...f,lineItems:f.lineItems.map(l=>l.id===lid?{...l,[fld]:fld==="qty"||fld==="unitPrice"?Number(v)||0:v}:l)}));
   const delEditLine=(lid)=>setEditForm(f=>({...f,lineItems:f.lineItems.filter(l=>l.id!==lid)}));
+  const addInvMaterial=(mat)=>{
+    var sellPrice=mat.cost*(1+mat.markup/100);
+    var line={id:uid(),description:mat.name,qty:1,unitPrice:Math.round(sellPrice*100)/100,isMaterial:true,sourceType:"material",sourceId:mat.id,unit:mat.unit};
+    setEditForm(f=>({...f,lineItems:[...f.lineItems,line]}));
+    setInvPicker(null);
+  };
+  const addInvLabor=(role)=>{
+    var b=calcBurden(role);
+    var line={id:uid(),description:role.title+" Labor",qty:1,unitPrice:b.fullyBurdenedRate,isMaterial:false,sourceType:"labor",sourceId:role.id,unit:"hr"};
+    setEditForm(f=>({...f,lineItems:[...f.lineItems,line]}));
+    setInvPicker(null);
+  };
   const saveEdit=()=>{
     if(!editForm.lineItems.length){showToast("Add at least one line item","error");return;}
     var lines=editForm.lineItems.filter(l=>l.description.trim());
@@ -4156,10 +4169,66 @@ function Invoices({invs,setInvs,custs,projs,ests,company,showToast,db}) {
                   </div>
                 </div>
 
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
                   <label className="lbl" style={{marginBottom:0}}>Line Items</label>
-                  <button onClick={addEditLine} className="bb b-gh" style={{padding:"4px 9px",fontSize:10,borderRadius:6}}><I n="plus" s={10}/>Add Line</button>
+                  <div style={{display:"flex",gap:4}}>
+                    <button onClick={()=>setInvPicker({type:"material",search:""})} className="bb b-bl" style={{padding:"4px 9px",fontSize:10,borderRadius:6}}><I n="materials" s={10}/>Material</button>
+                    <button onClick={()=>setInvPicker({type:"labor",search:""})} className="bb b-am" style={{padding:"4px 9px",fontSize:10,borderRadius:6}}><I n="wrench" s={10}/>Labor</button>
+                    <button onClick={addEditLine} className="bb b-gh" style={{padding:"4px 9px",fontSize:10,borderRadius:6}}><I n="plus" s={10}/>Custom</button>
+                  </div>
                 </div>
+                {invPicker&&(
+                  <div style={{border:"1px solid var(--accent)",borderRadius:9,background:"#0a0d15",marginBottom:10,overflow:"hidden",animation:"up .18s ease"}}>
+                    <div style={{padding:"8px 10px",borderBottom:"1px solid #1e2535",display:"flex",gap:7,alignItems:"center"}}>
+                      <div style={{position:"relative",flex:1}}>
+                        <div style={{position:"absolute",left:7,top:"50%",transform:"translateY(-50%)",color:"#3a4160",pointerEvents:"none"}}><I n="search" s={11}/></div>
+                        <input className="inp" autoFocus value={invPicker.search} onChange={function(e){setInvPicker(function(p){return{...p,search:e.target.value};});}} placeholder={invPicker.type==="material"?"Search materials…":"Search labor roles…"} style={{paddingLeft:24,fontSize:11,padding:"5px 7px 5px 24px"}}/>
+                      </div>
+                      <button onClick={()=>setInvPicker(null)} style={{color:"#4a566e",flexShrink:0}}><I n="x" s={14}/></button>
+                    </div>
+                    <div style={{maxHeight:180,overflowY:"auto"}}>
+                      {invPicker.type==="material"&&(function(){
+                        var fMats=(mats||[]).filter(function(m){return !invPicker.search||m.name.toLowerCase().includes(invPicker.search.toLowerCase())||m.category.toLowerCase().includes(invPicker.search.toLowerCase())||m.supplier.toLowerCase().includes(invPicker.search.toLowerCase());});
+                        return fMats.length===0
+                          ?<div style={{padding:"14px",textAlign:"center",color:"#3a4160",fontSize:11}}>No materials found</div>
+                          :fMats.map(function(m){
+                            var sp2=m.cost*(1+m.markup/100);
+                            return <div key={m.id} onClick={function(){addInvMaterial(m);}} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 12px",borderBottom:"1px solid #0e1119",cursor:"pointer",transition:"background .1s"}} className="rh">
+                              <div style={{flex:1,minWidth:0}}>
+                                <div style={{fontSize:11,fontWeight:600,color:"#c8d0e0",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.name}</div>
+                                <div style={{fontSize:9,color:"#3a4160",marginTop:1}}><span style={{padding:"1px 5px",borderRadius:6,background:(CAT_C[m.category]||"#4a566e")+"18",color:CAT_C[m.category]||"#7a8299",fontSize:8,fontWeight:700}}>{m.category}</span> · {m.supplier} · {m.stock} {m.unit} in stock</div>
+                              </div>
+                              <div style={{textAlign:"right",flexShrink:0,marginLeft:10}}>
+                                <div className="mn" style={{fontSize:11,color:"#22c55e"}}>{fmtD(sp2)}<span style={{fontSize:8,color:"#3a4160"}}>/{m.unit}</span></div>
+                                <div style={{fontSize:8,color:"#4a566e"}}>cost {fmtD(m.cost)} +{m.markup}%</div>
+                              </div>
+                            </div>;
+                          });
+                      })()}
+                      {invPicker.type==="labor"&&(function(){
+                        var fRoles=(roles||[]).filter(function(r){return !invPicker.search||r.title.toLowerCase().includes(invPicker.search.toLowerCase());});
+                        return fRoles.length===0
+                          ?<div style={{padding:"14px",textAlign:"center",color:"#3a4160",fontSize:11}}>No labor roles found</div>
+                          :fRoles.map(function(r){
+                            var b=calcBurden(r);var tc=ROLE_C[r.title]||"#4a566e";
+                            return <div key={r.id} onClick={function(){addInvLabor(r);}} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 12px",borderBottom:"1px solid #0e1119",cursor:"pointer",transition:"background .1s"}} className="rh">
+                              <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                                <div style={{width:4,height:22,borderRadius:2,background:tc,flexShrink:0}}/>
+                                <div>
+                                  <div style={{fontSize:11,fontWeight:600,color:"#c8d0e0"}}>{r.title}</div>
+                                  <div style={{fontSize:8,color:"#3a4160",marginTop:1}}>Base ${r.baseRate}/hr · Burden {b.totalBurdenPct.toFixed(1)}%</div>
+                                </div>
+                              </div>
+                              <div style={{textAlign:"right",flexShrink:0}}>
+                                <div className="mn" style={{fontSize:11,color:"#22c55e"}}>${b.fullyBurdenedRate.toFixed(2)}<span style={{fontSize:8,color:"#3a4160"}}>/hr</span></div>
+                                <div style={{fontSize:8,color:"#4a566e"}}>fully burdened</div>
+                              </div>
+                            </div>;
+                          });
+                      })()}
+                    </div>
+                  </div>
+                )}
 
                 {(()=>{
                   var labLines=editForm.lineItems.filter(l=>!l.isMaterial);
@@ -4191,7 +4260,7 @@ function Invoices({invs,setInvs,custs,projs,ests,company,showToast,db}) {
                   return <>{renderSec("Labor",labLines,"#f5a623","Hrs","wrench")}{renderSec("Materials",matLines,"#6c8ebf","Qty","materials")}</>;
                 })()}
 
-                {editForm.lineItems.length===0&&<div style={{padding:20,textAlign:"center",color:"#3a4160",fontSize:12,border:"1px dashed #1e2535",borderRadius:9}}>No line items yet. Click "Add Line" above.</div>}
+                {editForm.lineItems.length===0&&<div style={{padding:20,textAlign:"center",color:"#3a4160",fontSize:12,border:"1px dashed #1e2535",borderRadius:9}}>No line items yet. Add from Materials, Labor, or Custom above.</div>}
 
                 <div style={{marginBottom:12,marginTop:10}}><label className="lbl">Notes</label><textarea className="inp" value={editForm.notes||""} onChange={e=>setEditForm(f=>({...f,notes:e.target.value}))} rows={2} style={{resize:"vertical"}}/></div>
 
