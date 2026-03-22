@@ -18,7 +18,7 @@ const nxtNum = (list,prefix,yr=2026) => {
     .map(x=>parseInt((x.number||x.id||"").split("-")[2]||0)).reduce((m,n)=>Math.max(m,n),0);
   return `${prefix}-${yr}-${String(max+1).padStart(3,"0")}`;
 };
-const calcInv = (lines=[],taxRate=FL_TAX,discountPct=0) => {
+const calcInv = (lines=[],taxRate=FL_TAX,discountPct=0,depositType="none",depositValue=0) => {
   const sub = lines.reduce((s,l)=>s+(l.qty*l.unitPrice),0);
   const lab = lines.filter(l=>!l.isMaterial).reduce((s,l)=>s+(l.qty*l.unitPrice),0);
   const mat = lines.filter(l=> l.isMaterial).reduce((s,l)=>s+(l.qty*l.unitPrice),0);
@@ -26,7 +26,10 @@ const calcInv = (lines=[],taxRate=FL_TAX,discountPct=0) => {
   const discSub = sub - discAmt;
   const discMat = discountPct>0?Math.round(mat*(1-discountPct/100)*100)/100:mat;
   const tax = discMat*(taxRate/100);
-  return {sub,lab,mat,discountPct,discAmt,discSub,tax,total:discSub+tax};
+  const total = discSub+tax;
+  const depAmt = depositType==="percent"?Math.round(total*(depositValue/100)*100)/100:depositType==="flat"?Math.min(depositValue,total):0;
+  const balanceDue = total - depAmt;
+  return {sub,lab,mat,discountPct,discAmt,discSub,tax,total,depositType,depositValue,depAmt,balanceDue};
 };
 
 // ── CHART DATA ─────────────────────────────────────────────────
@@ -1426,7 +1429,7 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
   const [emailMd, setEmailMd] = useState(false);
 
   const blankLine=()=>({id:uid(),description:"",qty:1,unitPrice:0,isMaterial:false,sourceType:"custom",sourceId:null});
-  const blank={custId:"",name:"",date:tod(),expiry:addD(tod(),30),taxRate:FL_TAX,discount:0,notes:"",status:"draft",lineItems:[]};
+  const blank={custId:"",name:"",date:tod(),expiry:addD(tod(),30),taxRate:FL_TAX,discount:0,depositType:"none",depositValue:0,notes:"",status:"draft",lineItems:[]};
 
   const filt=useMemo(()=>ests.filter(e=>{
     const ms=!srch||e.name.toLowerCase().includes(srch.toLowerCase())||(e.number||"").toLowerCase().includes(srch.toLowerCase())||custs.find(c=>c.id===e.custId)?.name.toLowerCase().includes(srch.toLowerCase());
@@ -1434,8 +1437,8 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
   }),[ests,srch,stF,custs]);
 
   const se=ests.find(e=>e.id===sel)||null;
-  const seC=se?calcInv(se.lineItems,se.taxRate,se.discount||0):{sub:0,lab:0,mat:0,discountPct:0,discAmt:0,discSub:0,tax:0,total:0};
-  const formC=form?calcInv(form.lineItems.filter(l=>l.description.trim()),Number(form.taxRate)||FL_TAX,Number(form.discount)||0):{sub:0,lab:0,mat:0,discountPct:0,discAmt:0,discSub:0,tax:0,total:0};
+  const seC=se?calcInv(se.lineItems,se.taxRate,se.discount||0,se.depositType||"none",Number(se.depositValue)||0):{sub:0,lab:0,mat:0,discountPct:0,discAmt:0,discSub:0,tax:0,total:0,depAmt:0,balanceDue:0};
+  const formC=form?calcInv(form.lineItems.filter(l=>l.description.trim()),Number(form.taxRate)||FL_TAX,Number(form.discount)||0,form.depositType||"none",Number(form.depositValue)||0):{sub:0,lab:0,mat:0,discountPct:0,discAmt:0,discSub:0,tax:0,total:0,depAmt:0,balanceDue:0};
 
   const openNew=()=>setForm({...blank,_id:null});
   const openEdit=e=>setForm({...e,_id:e.id,lineItems:e.lineItems.map(l=>({...l,sourceType:l.sourceType||(l.isMaterial?"material":"labor"),sourceId:l.sourceId||null}))});
@@ -1461,7 +1464,7 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
     if(!form.name.trim()){showToast("Name required","error");return;}
     const lines=form.lineItems.filter(l=>l.description.trim());
     const c=calcInv(lines,Number(form.taxRate),Number(form.discount)||0);
-    const data={...form,custId:Number(form.custId)||form.custId,subtotal:c.sub,materialSubtotal:c.mat,discount:Number(form.discount)||0,lineItems:lines};
+    const data={...form,custId:Number(form.custId)||form.custId,subtotal:c.sub,materialSubtotal:c.mat,discount:Number(form.discount)||0,depositType:form.depositType||"none",depositValue:Number(form.depositValue)||0,lineItems:lines};
     if(form._id){var ch={...data};delete ch._id;db.ests.update(form._id,ch);showToast("Updated");}
     else{const id=nxtNum(ests,"EST");const ne={...data,id,number:id};db.ests.create(ne);setSel(id);showToast(id+" created");}
     setForm(null);
@@ -1492,13 +1495,13 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
   };
   const toInvoice=e=>{
     const id=nxtNum(invs,"INV");
-    db.invs.create({id,number:id,custId:e.custId,projId:e.projId||null,estId:e.id,status:"draft",issueDate:tod(),dueDate:addD(tod(),30),discount:e.discount||0,paidDate:null,taxRate:e.taxRate,notes:"From "+e.number,lineItems:e.lineItems.map(function(l,i){return{...l,id:i+1};})});
+    db.invs.create({id,number:id,custId:e.custId,projId:e.projId||null,estId:e.id,status:"draft",issueDate:tod(),dueDate:addD(tod(),30),discount:e.discount||0,depositType:e.depositType||"none",depositValue:Number(e.depositValue)||0,paidDate:null,taxRate:e.taxRate,notes:"From "+e.number,lineItems:e.lineItems.map(function(l,i){return{...l,id:i+1};})});
     showToast(id+" created");setTab("invoices");
   };
   const del=id=>{db.ests.remove(id);if(sel===id)setSel(null);showToast("Deleted");};
 
   const exportEst=(e,autoPrint=false)=>{
-    const c=custs.find(x=>x.id===e.custId);const calc=calcInv(e.lineItems,e.taxRate,e.discount||0);
+    const c=custs.find(x=>x.id===e.custId);const calc=calcInv(e.lineItems,e.taxRate,e.discount||0,e.depositType||"none",Number(e.depositValue)||0);
     const labItems=e.lineItems.filter(l=>!l.isMaterial);const matItems=e.lineItems.filter(l=>l.isMaterial);
     const mkRows=(items,qtyH)=>items.map((li,i)=>`<tr><td>${i+1}</td><td>${li.description}</td><td class="mn" style="text-align:right">${li.qty}${qtyH==="Hours"?" hrs":""}</td><td class="mn" style="text-align:right">${fmtD(li.unitPrice)}${qtyH==="Hours"?"/hr":""}</td><td class="mn" style="text-align:right;font-weight:700">${fmtD(li.qty*li.unitPrice)}</td></tr>`).join("");
     const mkSection=(title,items,qtyH)=>items.length===0?"":
@@ -1521,6 +1524,8 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
         <div class="row" style="font-weight:700"><span>After Discount</span><span class="mn">${fmt(calc.discSub)}</span></div>`:""}
         <div class="row"><span>Sales Tax (${e.taxRate}%${calc.discountPct>0?" on disc. materials":""})</span><span class="mn">${fmt(calc.tax)}</span></div>
         <div class="row grand"><span>TOTAL</span><span class="mn">${fmt(calc.total)}</span></div>
+        ${calc.depAmt>0?`<div class="row" style="border-top:1px dashed #ccc;padding-top:6px;color:#d97706"><span>Deposit Required${e.depositType==="percent"?" ("+e.depositValue+"%)":""}</span><span class="mn">${fmt(calc.depAmt)}</span></div>
+        <div class="row" style="font-weight:800;color:#2563eb"><span>Balance Due</span><span class="mn" style="font-size:15px">${fmt(calc.balanceDue)}</span></div>`:""}
       </div>
       ${e.notes?`<div class="notes" style="margin-top:16px"><strong>Notes:</strong> ${e.notes}</div>`:""}
       ${company.estimateFooter?`<div class="footer">${company.estimateFooter}</div>`:""}
@@ -1597,7 +1602,7 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
               </div>
             </div>
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-              {[{l:"Labor",v:fmt(seC.lab),c:"#f5a623"},{l:"Materials",v:fmt(seC.mat),c:"#6c8ebf"},{l:"Subtotal",v:fmt(seC.sub),c:"#dde1ec"},{l:`Tax ${se.taxRate}%`,v:fmt(seC.tax),c:"#14b8a6"},{l:"TOTAL",v:fmt(seC.total),c:"#22c55e",big:true}].map(k=>(
+              {[{l:"Labor",v:fmt(seC.lab),c:"#f5a623"},{l:"Materials",v:fmt(seC.mat),c:"#6c8ebf"},{l:"Subtotal",v:fmt(seC.sub),c:"#dde1ec"},{l:`Tax ${se.taxRate}%`,v:fmt(seC.tax),c:"#14b8a6"},{l:"TOTAL",v:fmt(seC.total),c:"#22c55e",big:true},...(seC.depAmt>0?[{l:"Deposit",v:fmt(seC.depAmt),c:"#f59e0b"},{l:"Balance Due",v:fmt(seC.balanceDue),c:"#63b3ed",big:true}]:[])].map(k=>(
                 <div key={k.l} style={{background:"#0c0f17",border:`1px solid ${k.big?"rgba(34,197,94,.3)":"#111826"}`,borderRadius:8,padding:"6px 11px"}}>
                   <div style={{fontSize:8,color:"#3a4160",fontWeight:700,textTransform:"uppercase",letterSpacing:.4}}>{k.l}</div>
                   <div className="mn" style={{fontSize:k.big?14:11,color:k.c,marginTop:2}}>{k.v}</div>
@@ -1653,6 +1658,16 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
                     <span style={{fontWeight:800,fontSize:13}}>TOTAL</span>
                     <span className="mn" style={{fontSize:18,color:"#22c55e"}}>{fmt(seC.total)}</span>
                   </div>
+                  {seC.depAmt>0&&(<>
+                    <div style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderTop:"1px dashed #1e2535"}}>
+                      <span style={{fontSize:11,color:"#f59e0b",fontWeight:700}}>Deposit Required{se.depositType==="percent"?` (${se.depositValue}%)`:""}</span>
+                      <span className="mn" style={{fontSize:11,color:"#f59e0b"}}>{fmt(seC.depAmt)}</span>
+                    </div>
+                    <div style={{display:"flex",justifyContent:"space-between",padding:"5px 0"}}>
+                      <span style={{fontSize:12,fontWeight:800,color:"#63b3ed"}}>Balance Due</span>
+                      <span className="mn" style={{fontSize:15,color:"#63b3ed"}}>{fmt(seC.balanceDue)}</span>
+                    </div>
+                  </>)}
                 </div>
               </div>
             </div>
@@ -1695,6 +1710,19 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
                   <div><label className="lbl">Expiry</label><input className="inp" type="date" value={form.expiry} onChange={e=>setForm(f=>({...f,expiry:e.target.value}))}/></div>
                   <div><label className="lbl">Tax Rate %</label><input className="inp" type="number" step=".1" value={form.taxRate} onChange={e=>setForm(f=>({...f,taxRate:Number(e.target.value)}))}/></div>
                   <div><label className="lbl">Discount %</label><input className="inp" type="number" step=".5" min="0" max="100" value={form.discount||0} onChange={e=>setForm(f=>({...f,discount:Number(e.target.value)||0}))} style={{borderColor:form.discount>0?"#a78bfa":"#1e2535"}}/></div>
+                </div>
+                <div className="g3" style={{marginBottom:12}}>
+                  <div><label className="lbl">Deposit</label>
+                    <select className="inp" value={form.depositType||"none"} onChange={e=>setForm(f=>({...f,depositType:e.target.value,depositValue:e.target.value==="none"?0:f.depositValue}))}>
+                      <option value="none">No Deposit</option>
+                      <option value="percent">% of Total</option>
+                      <option value="flat">Flat Amount</option>
+                    </select>
+                  </div>
+                  {form.depositType&&form.depositType!=="none"&&(<>
+                    <div><label className="lbl">{form.depositType==="percent"?"Deposit %":"Deposit $"}</label><input className="inp" type="number" step={form.depositType==="percent"?".5":".01"} min="0" value={form.depositValue||0} onChange={e=>setForm(f=>({...f,depositValue:Number(e.target.value)||0}))} style={{borderColor:"#f59e0b"}}/></div>
+                    <div><label className="lbl">Deposit Amount</label><div className="mn" style={{padding:"9px 13px",background:"#0c0f17",border:"1px solid #f59e0b",borderRadius:8,color:"#f59e0b",fontSize:13}}>{fmt(formC.depAmt)}</div></div>
+                  </>)}
                 </div>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
                   <label className="lbl" style={{marginBottom:0}}>Line Items</label>
@@ -1809,6 +1837,16 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
                   <div style={{padding:"10px 11px",background:"rgba(34,197,94,.05)"}}>
                     <div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontWeight:800,fontSize:12}}>TOTAL</span><span className="mn" style={{fontSize:17,color:"#22c55e"}}>{fmt(formC.total)}</span></div>
                   </div>
+                  {formC.depAmt>0&&(<>
+                    <div style={{display:"flex",justifyContent:"space-between",padding:"8px 11px",borderTop:"1px solid #111826",background:"rgba(245,158,11,.04)"}}>
+                      <span style={{fontSize:10,color:"#f59e0b",fontWeight:700}}>Deposit Required{form.depositType==="percent"?` (${form.depositValue}%)`:""}</span>
+                      <span className="mn" style={{fontSize:12,color:"#f59e0b"}}>{fmt(formC.depAmt)}</span>
+                    </div>
+                    <div style={{display:"flex",justifyContent:"space-between",padding:"8px 11px",background:"rgba(99,179,237,.04)"}}>
+                      <span style={{fontSize:10,color:"#63b3ed",fontWeight:700}}>Balance Due</span>
+                      <span className="mn" style={{fontSize:12,color:"#63b3ed"}}>{fmt(formC.balanceDue)}</span>
+                    </div>
+                  </>)}
                 </div>
                 <div style={{marginTop:10,background:"rgba(20,184,166,.06)",border:"1px solid rgba(20,184,166,.15)",borderRadius:8,padding:"9px 10px",fontSize:9,color:"#7a8299",lineHeight:1.7}}>
                   <div style={{color:"#14b8a6",fontWeight:700,marginBottom:2}}>Calculation</div>
@@ -3839,7 +3877,7 @@ function Invoices({invs,setInvs,custs,projs,ests,mats,roles,company,showToast,db
   const [editForm, setEditForm] = useState(null);
   const [invPicker, setInvPicker] = useState(null); // full-screen edit mode
   const si=invs.find(i=>i.id===sel)||null;
-  const siC=si?calcInv(si.lineItems,si.taxRate,si.discount||0):{sub:0,lab:0,mat:0,discountPct:0,discAmt:0,discSub:0,tax:0,total:0};
+  const siC=si?calcInv(si.lineItems,si.taxRate,si.discount||0,si.depositType||"none",Number(si.depositValue)||0):{sub:0,lab:0,mat:0,discountPct:0,discAmt:0,discSub:0,tax:0,total:0,depAmt:0,balanceDue:0};
 
   const filt=useMemo(()=>invs.filter(i=>stF==="all"||i.status===stF),[invs,stF]);
   const arKpis=useMemo(()=>{
@@ -3875,7 +3913,7 @@ function Invoices({invs,setInvs,custs,projs,ests,mats,roles,company,showToast,db
     if(!editForm.lineItems.length){showToast("Add at least one line item","error");return;}
     var lines=editForm.lineItems.filter(l=>l.description.trim());
     var c=calcInv(lines,Number(editForm.taxRate),Number(editForm.discount)||0);
-    var data={custId:Number(editForm.custId)||editForm.custId||null,projId:editForm.projId||null,issueDate:editForm.issueDate,dueDate:editForm.dueDate,discount:Number(editForm.discount)||0,taxRate:Number(editForm.taxRate),notes:editForm.notes||"",lineItems:lines};
+    var data={custId:Number(editForm.custId)||editForm.custId||null,projId:editForm.projId||null,issueDate:editForm.issueDate,dueDate:editForm.dueDate,discount:Number(editForm.discount)||0,depositType:editForm.depositType||"none",depositValue:Number(editForm.depositValue)||0,taxRate:Number(editForm.taxRate),notes:editForm.notes||"",lineItems:lines};
     if(editForm._id){
       db.invs.update(editForm._id,data);
       showToast("Invoice updated");
@@ -3887,12 +3925,12 @@ function Invoices({invs,setInvs,custs,projs,ests,mats,roles,company,showToast,db
     }
     setEditForm(null);
   };
-  const editFormC=editForm?calcInv(editForm.lineItems.filter(l=>l.description.trim()),Number(editForm.taxRate),Number(editForm.discount)||0):{sub:0,lab:0,mat:0,discountPct:0,discAmt:0,discSub:0,tax:0,total:0};
+  const editFormC=editForm?calcInv(editForm.lineItems.filter(l=>l.description.trim()),Number(editForm.taxRate),Number(editForm.discount)||0,editForm.depositType||"none",Number(editForm.depositValue)||0):{sub:0,lab:0,mat:0,discountPct:0,discAmt:0,discSub:0,tax:0,total:0,depAmt:0,balanceDue:0};
 
   const createFromEst=()=>{
     const e=ests.find(x=>x.id===srcId);if(!e)return;
     const id=nxtNum(invs,"INV");
-    db.invs.create({id,number:id,custId:e.custId,projId:e.projId||null,estId:e.id,status:"draft",issueDate:tod(),dueDate:addD(tod(),30),discount:e.discount||0,paidDate:null,taxRate:e.taxRate,notes:"From "+e.number,lineItems:e.lineItems.map(function(l,i){return{...l,id:i+1};})});
+    db.invs.create({id,number:id,custId:e.custId,projId:e.projId||null,estId:e.id,status:"draft",issueDate:tod(),dueDate:addD(tod(),30),discount:e.discount||0,depositType:e.depositType||"none",depositValue:Number(e.depositValue)||0,paidDate:null,taxRate:e.taxRate,notes:"From "+e.number,lineItems:e.lineItems.map(function(l,i){return{...l,id:i+1};})});
     setSel(id);setNewMd(null);showToast(id+" created");
   };
   const createFromProj=()=>{
@@ -3903,7 +3941,7 @@ function Invoices({invs,setInvs,custs,projs,ests,mats,roles,company,showToast,db
   };
   const createManual=()=>{
     const id=nxtNum(invs,"INV");
-    setEditForm({_id:null,id:id,number:id,custId:"",projId:null,estId:null,status:"draft",issueDate:tod(),dueDate:addD(tod(),30),discount:0,paidDate:null,taxRate:FL_TAX,notes:"",lineItems:[]});
+    setEditForm({_id:null,id:id,number:id,custId:"",projId:null,estId:null,status:"draft",issueDate:tod(),dueDate:addD(tod(),30),discount:0,depositType:"none",depositValue:0,paidDate:null,taxRate:FL_TAX,notes:"",lineItems:[]});
     setNewMd(null);
   };
   const dup=inv=>{
@@ -3914,7 +3952,7 @@ function Invoices({invs,setInvs,custs,projs,ests,mats,roles,company,showToast,db
   const del=id=>{db.invs.remove(id);if(sel===id)setSel(null);showToast("Deleted");};
 
   const exportInv=(inv,autoPrint=false)=>{
-    const c=custs.find(x=>x.id===inv.custId);const calc=calcInv(inv.lineItems,inv.taxRate,inv.discount||0);
+    const c=custs.find(x=>x.id===inv.custId);const calc=calcInv(inv.lineItems,inv.taxRate,inv.discount||0,inv.depositType||"none",Number(inv.depositValue)||0);
     const labItems=inv.lineItems.filter(l=>!l.isMaterial);const matItems=inv.lineItems.filter(l=>l.isMaterial);
     const mkRows=(items,qtyH)=>items.map((li,i)=>`<tr><td>${i+1}</td><td>${li.description}</td><td class="mn" style="text-align:right">${li.qty}${qtyH==="Hours"?" hrs":""}</td><td class="mn" style="text-align:right">${fmtD(li.unitPrice)}${qtyH==="Hours"?"/hr":""}</td><td class="mn" style="text-align:right;font-weight:700">${fmtD(li.qty*li.unitPrice)}</td></tr>`).join("");
     const mkSection=(title,items,qtyH)=>items.length===0?"":
@@ -3942,6 +3980,8 @@ function Invoices({invs,setInvs,custs,projs,ests,mats,roles,company,showToast,db
         <div class="row" style="font-weight:700"><span>After Discount</span><span class="mn">${fmt(calc.discSub)}</span></div>`:""}
         <div class="row"><span>Sales Tax (${inv.taxRate}%${calc.discountPct>0?" on disc. materials":""})</span><span class="mn">${fmt(calc.tax)}</span></div>
         <div class="row grand"><span>TOTAL DUE</span><span class="mn">${fmt(calc.total)}</span></div>
+        ${calc.depAmt>0?`<div class="row" style="border-top:1px dashed #ccc;padding-top:6px;color:#d97706"><span>Deposit Required${inv.depositType==="percent"?" ("+inv.depositValue+"%)":""}</span><span class="mn">${fmt(calc.depAmt)}</span></div>
+        <div class="row" style="font-weight:800;color:#2563eb;font-size:14px"><span>Balance Due</span><span class="mn" style="font-size:16px">${fmt(calc.balanceDue)}</span></div>`:""}
       </div>
       ${inv.notes?`<div class="notes" style="margin-top:16px"><strong>Notes:</strong> ${inv.notes}</div>`:""}
       ${company.invoiceFooter?`<div class="footer">${company.invoiceFooter}</div>`:""}
@@ -4017,7 +4057,7 @@ function Invoices({invs,setInvs,custs,projs,ests,mats,roles,company,showToast,db
                 </div>
               </div>
               <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-                {[{l:"Labor",v:fmt(siC.lab),c:"#f5a623"},{l:"Materials",v:fmt(siC.mat),c:"#6c8ebf"},{l:"Subtotal",v:fmt(siC.sub),c:"#dde1ec"},...(siC.discountPct>0?[{l:`Disc ${siC.discountPct}%`,v:`−${fmt(siC.discAmt)}`,c:"#a78bfa"}]:[]),{l:`Tax ${si.taxRate}%`,v:fmt(siC.tax),c:"#14b8a6"},{l:"TOTAL",v:fmt(siC.total),c:"#22c55e",big:true}].map(k=>(
+                {[{l:"Labor",v:fmt(siC.lab),c:"#f5a623"},{l:"Materials",v:fmt(siC.mat),c:"#6c8ebf"},{l:"Subtotal",v:fmt(siC.sub),c:"#dde1ec"},...(siC.discountPct>0?[{l:`Disc ${siC.discountPct}%`,v:`−${fmt(siC.discAmt)}`,c:"#a78bfa"}]:[]),{l:`Tax ${si.taxRate}%`,v:fmt(siC.tax),c:"#14b8a6"},{l:"TOTAL",v:fmt(siC.total),c:"#22c55e",big:true},...(siC.depAmt>0?[{l:"Deposit",v:fmt(siC.depAmt),c:"#f59e0b"},{l:"Balance Due",v:fmt(siC.balanceDue),c:"#63b3ed",big:true}]:[])].map(k=>(
                   <div key={k.l} style={{background:"#0c0f17",border:`1px solid ${k.big?"rgba(34,197,94,.28)":"#111826"}`,borderRadius:8,padding:"6px 11px"}}>
                     <div style={{fontSize:8,color:"#3a4160",fontWeight:700,textTransform:"uppercase",letterSpacing:.4}}>{k.l}</div>
                     <div className="mn" style={{fontSize:k.big?14:11,color:k.c,marginTop:2}}>{k.v}</div>
@@ -4073,6 +4113,16 @@ function Invoices({invs,setInvs,custs,projs,ests,mats,roles,company,showToast,db
                       <span style={{fontWeight:800,fontSize:13}}>TOTAL</span>
                       <span className="mn" style={{fontSize:17,color:"#22c55e"}}>{fmt(siC.total)}</span>
                     </div>
+                    {siC.depAmt>0&&(<>
+                      <div style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderTop:"1px dashed #1e2535"}}>
+                        <span style={{fontSize:11,color:"#f59e0b",fontWeight:700}}>Deposit Required</span>
+                        <span className="mn" style={{fontSize:11,color:"#f59e0b"}}>{fmt(siC.depAmt)}</span>
+                      </div>
+                      <div style={{display:"flex",justifyContent:"space-between",padding:"5px 0"}}>
+                        <span style={{fontSize:12,fontWeight:800,color:"#63b3ed"}}>Balance Due</span>
+                        <span className="mn" style={{fontSize:15,color:"#63b3ed"}}>{fmt(siC.balanceDue)}</span>
+                      </div>
+                    </>)}
                   </div>
                 </div>
               </div>
@@ -4167,6 +4217,19 @@ function Invoices({invs,setInvs,custs,projs,ests,mats,roles,company,showToast,db
                     <div><label className="lbl">Tax %</label><input className="inp" type="number" step=".1" value={editForm.taxRate} onChange={e=>setEditForm(f=>({...f,taxRate:Number(e.target.value)||0}))}/></div>
                     <div><label className="lbl">Disc %</label><input className="inp" type="number" step=".5" value={editForm.discount} onChange={e=>setEditForm(f=>({...f,discount:Number(e.target.value)||0}))}/></div>
                   </div>
+                </div>
+                <div className="g3" style={{marginBottom:14}}>
+                  <div><label className="lbl">Deposit</label>
+                    <select className="inp" value={editForm.depositType||"none"} onChange={e=>setEditForm(f=>({...f,depositType:e.target.value,depositValue:e.target.value==="none"?0:f.depositValue}))}>
+                      <option value="none">No Deposit</option>
+                      <option value="percent">% of Total</option>
+                      <option value="flat">Flat Amount</option>
+                    </select>
+                  </div>
+                  {editForm.depositType&&editForm.depositType!=="none"&&(<>
+                    <div><label className="lbl">{editForm.depositType==="percent"?"Deposit %":"Deposit $"}</label><input className="inp" type="number" step={editForm.depositType==="percent"?".5":".01"} min="0" value={editForm.depositValue||0} onChange={e=>setEditForm(f=>({...f,depositValue:Number(e.target.value)||0}))} style={{borderColor:"#f59e0b"}}/></div>
+                    <div><label className="lbl">Deposit Amount</label><div className="mn" style={{padding:"9px 13px",background:"#0c0f17",border:"1px solid #f59e0b",borderRadius:8,color:"#f59e0b",fontSize:13}}>{fmt(editFormC.depAmt)}</div></div>
+                  </>)}
                 </div>
 
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
@@ -4289,6 +4352,16 @@ function Invoices({invs,setInvs,custs,projs,ests,mats,roles,company,showToast,db
                   <div style={{padding:"10px 11px",background:"rgba(34,197,94,.05)"}}>
                     <div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontWeight:800,fontSize:12}}>TOTAL</span><span className="mn" style={{fontSize:17,color:"#22c55e"}}>{fmt(editFormC.total)}</span></div>
                   </div>
+                  {editFormC.depAmt>0&&(<>
+                    <div style={{display:"flex",justifyContent:"space-between",padding:"8px 11px",borderTop:"1px solid #111826",background:"rgba(245,158,11,.04)"}}>
+                      <span style={{fontSize:10,color:"#f59e0b",fontWeight:700}}>Deposit Required{editForm.depositType==="percent"?(" ("+editForm.depositValue+"%)"):""}</span>
+                      <span className="mn" style={{fontSize:12,color:"#f59e0b"}}>{fmt(editFormC.depAmt)}</span>
+                    </div>
+                    <div style={{display:"flex",justifyContent:"space-between",padding:"8px 11px",background:"rgba(99,179,237,.04)"}}>
+                      <span style={{fontSize:10,color:"#63b3ed",fontWeight:700}}>Balance Due</span>
+                      <span className="mn" style={{fontSize:12,color:"#63b3ed"}}>{fmt(editFormC.balanceDue)}</span>
+                    </div>
+                  </>)}
                 </div>
               </div>
             </div>
