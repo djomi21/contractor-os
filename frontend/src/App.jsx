@@ -576,7 +576,7 @@ function LoginPage({users, setUsers, onLogin}) {
         <div style={{position:"relative",zIndex:1,maxWidth:380}}>
           <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:32}}>
             <div style={{width:48,height:48,borderRadius:12,background:"linear-gradient(135deg,var(--accent),var(--accent-dark))",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 8px 32px rgba(59,130,246,.35)"}}><I n="wrench" s={22}/></div>
-            <div><div style={{fontSize:22,fontWeight:800,color:"#e2e8f0",letterSpacing:-.3}}>ContractorOS</div><div style={{fontSize:9,color:"#4a566e",fontWeight:700,letterSpacing:3,textTransform:"uppercase"}}>Pro · v3</div></div>
+            <div><div style={{fontSize:22,fontWeight:800,color:"#e2e8f0",letterSpacing:-.3}}>BuildMetry</div><div style={{fontSize:9,color:"#4a566e",fontWeight:700,letterSpacing:3,textTransform:"uppercase"}}>v1.0</div></div>
           </div>
           <div style={{fontSize:28,fontWeight:800,lineHeight:1.25,color:"#e2e8f0",marginBottom:14,letterSpacing:-.5}}>Run your construction<br/>business from one place.</div>
           <div style={{fontSize:14,color:"#4a566e",lineHeight:1.7,marginBottom:36}}>Estimates, projects, invoices, job costing, materials, subs — everything a GC needs to stay profitable and organized.</div>
@@ -594,7 +594,7 @@ function LoginPage({users, setUsers, onLogin}) {
         <div style={{width:"100%",maxWidth:400,animation:"slideUp .4s ease"}}>
           <div style={{marginBottom:28}}>
             <div style={{fontSize:22,fontWeight:800,color:"#e2e8f0",marginBottom:6}}>Welcome back</div>
-            <div style={{fontSize:13,color:"#4a566e"}}>Sign in to your ContractorOS workspace</div>
+            <div style={{fontSize:13,color:"#4a566e"}}>Sign in to your BuildMetry workspace</div>
           </div>
 
           {error&&(
@@ -682,7 +682,7 @@ function ForceChangePassword({auth, setAuth, showToast, handleLogout}) {
       var updated = {...auth, mustChangePassword: false};
       setAuth(updated);
       saveUser(updated);
-      showToast("Password changed successfully! Welcome to ContractorOS.");
+      showToast("Password changed successfully! Welcome to BuildMetry.");
     } catch (err) {
       setError(err.message || "Password change failed");
       setLoading(false);
@@ -954,8 +954,8 @@ export default function App() {
     <div style={{display:"flex",height:"100vh",alignItems:"center",justifyContent:"center",fontFamily:"'DM Sans',sans-serif",background:"#080a0f",color:"#dde1ec",flexDirection:"column",gap:16}}>
       <style>{CSS}</style>
       <div style={{width:40,height:40,borderRadius:10,background:"linear-gradient(135deg,var(--accent),var(--accent-dark))",display:"flex",alignItems:"center",justifyContent:"center"}}><I n="wrench" s={20}/></div>
-      <div style={{fontSize:14,fontWeight:700}}>Loading ContractorOS…</div>
-      <div style={{fontSize:9,color:"#3a4160"}}>v3.1-db</div>
+      <div style={{fontSize:14,fontWeight:700}}>Loading BuildMetry…</div>
+      <div style={{fontSize:9,color:"#3a4160"}}>v1.0</div>
       <div style={{width:120,height:4,borderRadius:2,background:"#1e2535",overflow:"hidden"}}><div style={{width:"60%",height:"100%",borderRadius:2,background:"var(--accent)",animation:"pulse 1.5s ease-in-out infinite"}}/></div>
     </div>
   );
@@ -982,7 +982,7 @@ export default function App() {
       }}>
         <div style={{padding:"18px 12px 16px",borderBottom:"1px solid #111826",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
           <div style={{width:32,height:32,borderRadius:8,background:"linear-gradient(135deg,var(--accent),var(--accent-dark))",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><I n="wrench" s={15}/></div>
-          {(sOpen||mobileNav)&&<div style={{flex:1}}><div style={{fontSize:15,fontWeight:800,color:"#e2e8f0",lineHeight:1}}>ContractorOS</div><div style={{fontSize:8,color:"#2d3a52",fontWeight:700,letterSpacing:2.5,textTransform:"uppercase",marginTop:2}}>Pro · v3</div></div>}
+          {(sOpen||mobileNav)&&<div style={{flex:1}}><div style={{fontSize:15,fontWeight:800,color:"#e2e8f0",lineHeight:1}}>BuildMetry</div><div style={{fontSize:8,color:"#2d3a52",fontWeight:700,letterSpacing:2.5,textTransform:"uppercase",marginTop:2}}>v1.0</div></div>}
           {mobileNav&&<button onClick={()=>setMobileNav(false)} style={{color:"#4a566e",padding:4}}><I n="x" s={16}/></button>}
         </div>
         <nav style={{flex:1,padding:"8px 5px",display:"flex",flexDirection:"column",gap:1,overflowY:"auto"}}>
