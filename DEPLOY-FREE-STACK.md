@@ -1,4 +1,4 @@
-# ContractorOS Pro — Free Stack Deployment
+# BuildMetry — Free Stack Deployment
 # Vercel (frontend) + Supabase (database) + Render (backend)
 # Total cost: $0/month
 
