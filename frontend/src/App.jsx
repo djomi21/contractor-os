@@ -75,11 +75,11 @@ const SD_ESTS=[
 ];
 
 const SD_PROJS=[
-  {id:"PRJ-2026-001",name:"Thornton Kitchen Full Remodel",custId:1,estId:"EST-2026-001",status:"active",contractValue:38000,budgetLabor:18000,budgetMaterials:14200,actualLabor:12400,actualMaterials:9800,start:"2026-02-01",end:"2026-03-28",phase:"Finishes",progress:72,notes:"On track. Countertops install next week."},
-  {id:"PRJ-2026-002",name:"Rivera Bathroom Remodel",custId:2,estId:"EST-2026-002",status:"active",contractValue:19500,budgetLabor:9300,budgetMaterials:8100,actualLabor:7200,actualMaterials:6900,start:"2026-02-15",end:"2026-03-20",phase:"Installations",progress:85,notes:"Final punch list pending."},
-  {id:"PRJ-2026-003",name:"Goldberg Composite Deck",custId:3,estId:"EST-2026-003",status:"active",contractValue:14200,budgetLabor:5700,budgetMaterials:6200,actualLabor:3200,actualMaterials:4100,start:"2026-03-01",end:"2026-03-22",phase:"Rough-In",progress:40,notes:"Material delivery on 3/14."},
-  {id:"PRJ-2026-004",name:"Park Detached ADU",custId:4,estId:"EST-2026-004",status:"active",contractValue:88000,budgetLabor:42000,budgetMaterials:32000,actualLabor:9600,actualMaterials:12000,start:"2026-03-10",end:"2026-07-01",phase:"Site Prep",progress:12,notes:"Foundation pour complete. Framing starts 3/16."},
-  {id:"PRJ-2026-005",name:"Chen Master Suite Addition",custId:5,estId:null,status:"complete",contractValue:31000,budgetLabor:16500,budgetMaterials:9500,actualLabor:16200,actualMaterials:9100,start:"2026-01-05",end:"2026-02-28",phase:"Closeout & Punch List",progress:100,notes:"Signed off 2/28."},
+  {id:"PRJ-2026-001",name:"Thornton Kitchen Full Remodel",custId:1,estId:"EST-2026-001",status:"active",contractValue:38000,budgetLabor:18000,budgetMaterials:14200,actualLabor:12400,actualMaterials:9800,start:"2026-02-01",end:"2026-03-28",phase:"Finish Work",progress:72,notes:"On track. Countertops install next week."},
+  {id:"PRJ-2026-002",name:"Rivera Bathroom Remodel",custId:2,estId:"EST-2026-002",status:"active",contractValue:19500,budgetLabor:9300,budgetMaterials:8100,actualLabor:7200,actualMaterials:6900,start:"2026-02-15",end:"2026-03-20",phase:"Tile & Fixtures",progress:85,notes:"Final punch list pending."},
+  {id:"PRJ-2026-003",name:"Goldberg Composite Deck",custId:3,estId:"EST-2026-003",status:"active",contractValue:14200,budgetLabor:5700,budgetMaterials:6200,actualLabor:3200,actualMaterials:4100,start:"2026-03-01",end:"2026-03-22",phase:"Framing",progress:40,notes:"Material delivery on 3/14."},
+  {id:"PRJ-2026-004",name:"Park Detached ADU",custId:4,estId:"EST-2026-004",status:"active",contractValue:88000,budgetLabor:42000,budgetMaterials:32000,actualLabor:9600,actualMaterials:12000,start:"2026-03-10",end:"2026-07-01",phase:"Foundation",progress:12,notes:"Foundation pour complete. Framing starts 3/16."},
+  {id:"PRJ-2026-005",name:"Chen Master Suite Addition",custId:5,estId:null,status:"complete",contractValue:31000,budgetLabor:16500,budgetMaterials:9500,actualLabor:16200,actualMaterials:9100,start:"2026-01-05",end:"2026-02-28",phase:"Complete",progress:100,notes:"Signed off 2/28."},
 ];
 
 const SD_MATS=[
@@ -173,17 +173,17 @@ const SD_EXPENSES=[
 
 const EXPENSE_CATS=["Materials","Labor","Permits","Equipment Rental","Insurance","Vehicle","Fuel","Office","Tools","Subcontractor/Crew","Disposal","Meals","Travel","Marketing","Miscellaneous"];
 
-const SD_PHASES=["Planning","Design","Permitting","Demolition","Site Prep","Rough-In","Installations","Finishes","Closeout & Punch List"];
+const SD_PHASES=["Planning","Design","Permitting","Demolition","Site Prep","Rough-In","Installations","Finishes","Closeout & Punch List","Completed"];
 
 const SD_TASKS=[
-  {id:"T-001",projId:"PRJ-2026-001",phase:"Finishes",title:"Install countertops",assignedTo:1,status:"in_progress",dueDate:"2026-03-18",notes:"Granite template done"},
-  {id:"T-002",projId:"PRJ-2026-001",phase:"Finishes",title:"Install backsplash tile",assignedTo:4,status:"todo",dueDate:"2026-03-20",notes:""},
-  {id:"T-003",projId:"PRJ-2026-001",phase:"Closeout & Punch List",title:"Touch-up paint",assignedTo:6,status:"todo",dueDate:"2026-03-25",notes:""},
-  {id:"T-004",projId:"PRJ-2026-002",phase:"Installations",title:"Install shower fixtures",assignedTo:3,status:"in_progress",dueDate:"2026-03-16",notes:"Thermostatic valve"},
-  {id:"T-005",projId:"PRJ-2026-002",phase:"Closeout & Punch List",title:"Final cleaning",assignedTo:null,status:"todo",dueDate:"2026-03-19",notes:""},
-  {id:"T-006",projId:"PRJ-2026-003",phase:"Rough-In",title:"Set deck posts",assignedTo:7,status:"done",dueDate:"2026-03-08",notes:"6x6 posts set in concrete"},
-  {id:"T-007",projId:"PRJ-2026-003",phase:"Rough-In",title:"Install joists & blocking",assignedTo:7,status:"in_progress",dueDate:"2026-03-14",notes:""},
-  {id:"T-008",projId:"PRJ-2026-004",phase:"Site Prep",title:"Pour slab",assignedTo:10,status:"done",dueDate:"2026-03-15",notes:"640 SF slab poured"},
+  {id:"T-001",projId:"PRJ-2026-001",phase:"Finish Work",title:"Install countertops",assignedTo:1,status:"in_progress",dueDate:"2026-03-18",notes:"Granite template done"},
+  {id:"T-002",projId:"PRJ-2026-001",phase:"Finish Work",title:"Install backsplash tile",assignedTo:4,status:"todo",dueDate:"2026-03-20",notes:""},
+  {id:"T-003",projId:"PRJ-2026-001",phase:"Punch List",title:"Touch-up paint",assignedTo:6,status:"todo",dueDate:"2026-03-25",notes:""},
+  {id:"T-004",projId:"PRJ-2026-002",phase:"Tile & Fixtures",title:"Install shower fixtures",assignedTo:3,status:"in_progress",dueDate:"2026-03-16",notes:"Thermostatic valve"},
+  {id:"T-005",projId:"PRJ-2026-002",phase:"Punch List",title:"Final cleaning",assignedTo:null,status:"todo",dueDate:"2026-03-19",notes:""},
+  {id:"T-006",projId:"PRJ-2026-003",phase:"Framing",title:"Set deck posts",assignedTo:7,status:"done",dueDate:"2026-03-08",notes:"6x6 posts set in concrete"},
+  {id:"T-007",projId:"PRJ-2026-003",phase:"Framing",title:"Install joists & blocking",assignedTo:7,status:"in_progress",dueDate:"2026-03-14",notes:""},
+  {id:"T-008",projId:"PRJ-2026-004",phase:"Foundation",title:"Pour slab",assignedTo:10,status:"done",dueDate:"2026-03-15",notes:"640 SF slab poured"},
 ];
 
 const SD_COMPANY={
@@ -1928,7 +1928,7 @@ function Projects({projs,setProjs,custs,ests,cos,invs,tasks,setTasks,phases,subs
 
   const markComplete=(proj)=>{
     if(!confirm("Mark \""+proj.name+"\" as complete?\n\nThis will create a final invoice with estimate line items + approved change orders.")) return;
-    db.projs.update(proj.id,{status:"complete",phase:"Closeout & Punch List",progress:100});
+    db.projs.update(proj.id,{status:"complete",phase:"Complete",progress:100});
     var lineItems=[];var lineId=1;
     var est=(ests||[]).find(function(e){return e.id===proj.estId;});
     if(est&&est.lineItems){
@@ -2113,7 +2113,7 @@ function Projects({projs,setProjs,custs,ests,cos,invs,tasks,setTasks,phases,subs
                   <div style={{padding:"12px 15px",borderTop:"1px solid #1e2535",background:"#0a0d15"}}>
                     <div style={{fontSize:12,fontWeight:700,marginBottom:8}}>{taskForm.id?"Edit Task":"New Task"}</div>
                     <div style={{marginBottom:8}}>
-                      <div><label className="lbl">Title *</label><input className="inp" value={taskForm.title} onChange={function(e){setTaskForm(function(f){return{...f,title:e.target.value};})}} placeholder="Task description"/></div>
+                      <label className="lbl">Title *</label><input className="inp" value={taskForm.title} onChange={function(e){setTaskForm(function(f){return{...f,title:e.target.value};})}} placeholder="Task description"/>
                     </div>
                     <div className="g3" style={{marginBottom:8}}>
                       <div><label className="lbl">Assign Crew</label>
@@ -3450,7 +3450,6 @@ function CompanySetup({company,setCompany,users,setUsers,showToast,db,roles,setR
     {id:"roles",label:"Role Permissions",icon:"shield"},
     {id:"labor",label:"Labor Roles",icon:"wrench"},
     {id:"admin_roles",label:"Admin Roles",icon:"building"},
-    {id:"categories",label:"Categories",icon:"list"},
     {id:"email",label:"Email & Notifications",icon:"bell"},
     {id:"theme",label:"Theme & Branding",icon:"palette"},
     {id:"company",label:"Company Info",icon:"settings"},
@@ -3639,92 +3638,6 @@ function CompanySetup({company,setCompany,users,setUsers,showToast,db,roles,setR
       {stab==="admin_roles"&&(
         <LaborRoles roles={roles} setRoles={setRoles} showToast={showToast} db={db} filterFn={function(r){return MGMT_ROLES.has(r.title);}} heading="Administrative Roles"/>
       )}
-
-      {/* ── CATEGORIES TAB ── */}
-      {stab==="categories"&&(()=>{
-        const [newPhase,setNewPhase]=useState("");
-        const addPhase=()=>{
-          var v=newPhase.trim();
-          if(!v){showToast("Enter a phase name","error");return;}
-          if(phases.includes(v)){showToast("Phase already exists","error");return;}
-          setPhases(prev=>[...prev,v]);
-          api.phases.create({name:v,sortOrder:phases.length}).catch(function(e){console.error("Phase create fail:",e);});
-          setNewPhase("");
-          showToast("Phase added");
-        };
-        const delPhase=(ph)=>{
-          if(phases.length<=2){showToast("Must keep at least 2 phases","error");return;}
-          if(!confirm("Delete phase \""+ph+"\"? Existing projects using this phase won't be affected.")) return;
-          setPhases(prev=>prev.filter(p=>p!==ph));
-          // Find the phase record to delete by name
-          api.phases.list().then(function(all){
-            var rec=all.find(function(x){return x.name===ph;});
-            if(rec) api.phases.remove(rec.id).catch(function(e){console.error("Phase delete fail:",e);});
-          }).catch(function(){});
-          showToast("Phase removed");
-        };
-        const movePhase=(idx,dir)=>{
-          var ni=idx+dir;
-          if(ni<0||ni>=phases.length)return;
-          var arr=[...phases];
-          var tmp=arr[idx];arr[idx]=arr[ni];arr[ni]=tmp;
-          setPhases(arr);
-          // Save new order to API
-          api.phases.list().then(function(all){
-            var updates=arr.map(function(name,i){
-              var rec=all.find(function(x){return x.name===name;});
-              return rec?{id:rec.id,sortOrder:i}:null;
-            }).filter(Boolean);
-            if(updates.length>0) api.phases.reorder(updates).catch(function(e){console.error("Reorder fail:",e);});
-          }).catch(function(){});
-        };
-
-        return <div style={{display:"flex",flexDirection:"column",gap:20,maxWidth:780}}>
-
-          {/* PROJECT PHASES */}
-          <div style={{background:"#0c0f17",border:"1px solid #111826",borderRadius:11,overflow:"hidden"}}>
-            <div style={{padding:"14px 18px",borderBottom:"1px solid #111826",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div>
-                <div style={{fontSize:15,fontWeight:800}}>Project Phases</div>
-                <div style={{fontSize:11,color:"#4a566e",marginTop:2}}>Define the construction phases used across all projects. Drag to reorder.</div>
-              </div>
-              <span style={{fontSize:11,color:"#4a566e",fontWeight:700}}>{phases.length} phases</span>
-            </div>
-
-            <div style={{padding:"12px 18px",borderBottom:"1px solid #111826",display:"flex",gap:8}}>
-              <input className="inp" value={newPhase} onChange={function(e){setNewPhase(e.target.value);}} onKeyDown={function(e){if(e.key==="Enter")addPhase();}} placeholder="New phase name…" style={{flex:1}}/>
-              <button onClick={addPhase} className="bb b-bl" style={{padding:"8px 14px",fontSize:12,flexShrink:0}}><I n="plus" s={12}/>Add Phase</button>
-            </div>
-
-            <div>
-              {phases.map(function(ph,i){
-                var isFirst=i===0;var isLast=i===phases.length-1;
-                return <div key={ph} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 18px",borderBottom:"1px solid #0e1119"}} className="rh">
-                  <div style={{display:"flex",flexDirection:"column",gap:2,flexShrink:0}}>
-                    <button onClick={function(){movePhase(i,-1);}} disabled={isFirst} style={{padding:1,color:isFirst?"#1e2535":"#4a566e",cursor:isFirst?"default":"pointer"}}><I n="arrow" s={10} style={{transform:"rotate(180deg)"}}/></button>
-                    <button onClick={function(){movePhase(i,1);}} disabled={isLast} style={{padding:1,color:isLast?"#1e2535":"#4a566e",cursor:isLast?"default":"pointer"}}><I n="arrow" s={10}/></button>
-                  </div>
-                  <span style={{fontSize:12,color:"#3a4160",fontWeight:700,width:20,textAlign:"center",flexShrink:0}}>{i+1}</span>
-                  <span style={{flex:1,fontSize:13,fontWeight:600,color:"#c8d0e0"}}>{ph}</span>
-                  {ph==="Complete"
-                    ?<span style={{fontSize:9,color:"#3a4160",fontStyle:"italic"}}>required</span>
-                    :<button onClick={function(){delPhase(ph);}} style={{padding:4,color:"#3a4160",flexShrink:0}} title="Remove"><I n="x" s={13}/></button>
-                  }
-                </div>;
-              })}
-            </div>
-          </div>
-
-          {/* INFO */}
-          <div style={{background:"rgba(59,130,246,.04)",border:"1px solid rgba(59,130,246,.12)",borderRadius:9,padding:"12px 16px"}}>
-            <div style={{fontSize:11,color:"#63b3ed",fontWeight:700,marginBottom:4}}>How Phases Work</div>
-            <div style={{fontSize:11,color:"#7a8299",lineHeight:1.7}}>
-              Phases define the construction stages for your projects. When you create or edit a project, you pick from this list. Tasks can also be assigned to phases, so your crew knows what belongs to each stage. Reorder them to match your typical build sequence.
-            </div>
-          </div>
-
-        </div>;
-      })()}
 
       {/* ── COMPANY INFO TAB ── */}
       {stab==="company"&&(
