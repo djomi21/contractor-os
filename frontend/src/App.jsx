@@ -2112,13 +2112,8 @@ function Projects({projs,setProjs,custs,ests,cos,invs,tasks,setTasks,phases,subs
                 {taskForm&&(
                   <div style={{padding:"12px 15px",borderTop:"1px solid #1e2535",background:"#0a0d15"}}>
                     <div style={{fontSize:12,fontWeight:700,marginBottom:8}}>{taskForm.id?"Edit Task":"New Task"}</div>
-                    <div className="g2" style={{marginBottom:8}}>
+                    <div style={{marginBottom:8}}>
                       <div><label className="lbl">Title *</label><input className="inp" value={taskForm.title} onChange={function(e){setTaskForm(function(f){return{...f,title:e.target.value};})}} placeholder="Task description"/></div>
-                      <div><label className="lbl">Phase</label>
-                        <select className="inp" value={taskForm.phase} onChange={function(e){setTaskForm(function(f){return{...f,phase:e.target.value};});}}>
-                          {PHASES.map(function(ph){return <option key={ph} value={ph}>{ph}</option>;})}
-                        </select>
-                      </div>
                     </div>
                     <div className="g3" style={{marginBottom:8}}>
                       <div><label className="lbl">Assign Crew</label>

@@ -29,7 +29,8 @@ CROSS JOIN (VALUES
     (5, 'Rough-In'),
     (6, 'Installations'),
     (7, 'Finishes'),
-    (8, 'Closeout & Punch List')
+    (8, 'Closeout & Punch List'),
+    (9, 'Completed')
 ) AS phases("sortOrder", "name")
 ON CONFLICT ("companyId", "name") DO UPDATE
     SET "sortOrder" = EXCLUDED."sortOrder";
