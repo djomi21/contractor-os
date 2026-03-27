@@ -173,7 +173,7 @@ const SD_EXPENSES=[
 
 const EXPENSE_CATS=["Materials","Labor","Permits","Equipment Rental","Insurance","Vehicle","Fuel","Office","Tools","Subcontractor/Crew","Disposal","Meals","Travel","Marketing","Miscellaneous"];
 
-const SD_PHASES=["Planning","Permitting","Site Prep","Foundation","Framing","Rough-In","Insulation","Drywall","Tile & Fixtures","Finish Work","Punch List","Complete"];
+const SD_PHASES=["Planning","Design","Permitting","Demolition","Site Prep","Rough-In","Installations","Finishes","Closeout & Punch List"];
 
 const SD_TASKS=[
   {id:"T-001",projId:"PRJ-2026-001",phase:"Finish Work",title:"Install countertops",assignedTo:1,status:"in_progress",dueDate:"2026-03-18",notes:"Granite template done"},
