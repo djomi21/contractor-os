@@ -173,6 +173,19 @@ const SD_EXPENSES=[
 
 const EXPENSE_CATS=["Materials","Labor","Permits","Equipment Rental","Insurance","Vehicle","Fuel","Office","Tools","Subcontractor/Crew","Disposal","Meals","Travel","Marketing","Miscellaneous"];
 
+const SD_PHASES=["Planning","Permitting","Site Prep","Foundation","Framing","Rough-In","Insulation","Drywall","Tile & Fixtures","Finish Work","Punch List","Complete"];
+
+const SD_TASKS=[
+  {id:"T-001",projId:"PRJ-2026-001",phase:"Finish Work",title:"Install countertops",assignedTo:1,status:"in_progress",dueDate:"2026-03-18",notes:"Granite template done"},
+  {id:"T-002",projId:"PRJ-2026-001",phase:"Finish Work",title:"Install backsplash tile",assignedTo:4,status:"todo",dueDate:"2026-03-20",notes:""},
+  {id:"T-003",projId:"PRJ-2026-001",phase:"Punch List",title:"Touch-up paint",assignedTo:6,status:"todo",dueDate:"2026-03-25",notes:""},
+  {id:"T-004",projId:"PRJ-2026-002",phase:"Tile & Fixtures",title:"Install shower fixtures",assignedTo:3,status:"in_progress",dueDate:"2026-03-16",notes:"Thermostatic valve"},
+  {id:"T-005",projId:"PRJ-2026-002",phase:"Punch List",title:"Final cleaning",assignedTo:null,status:"todo",dueDate:"2026-03-19",notes:""},
+  {id:"T-006",projId:"PRJ-2026-003",phase:"Framing",title:"Set deck posts",assignedTo:7,status:"done",dueDate:"2026-03-08",notes:"6x6 posts set in concrete"},
+  {id:"T-007",projId:"PRJ-2026-003",phase:"Framing",title:"Install joists & blocking",assignedTo:7,status:"in_progress",dueDate:"2026-03-14",notes:""},
+  {id:"T-008",projId:"PRJ-2026-004",phase:"Foundation",title:"Pour slab",assignedTo:10,status:"done",dueDate:"2026-03-15",notes:"640 SF slab poured"},
+];
+
 const SD_COMPANY={
   name:"JB Construction LLC",
   owner:"Jason Braddock",
@@ -795,6 +808,8 @@ export default function App() {
   const [invs,     setInvs]     = useState([]);
   const [cos,      setCos]      = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [tasks,    setTasks]    = useState([]);
+  const [phases,   setPhases]   = useState(SD_PHASES);
   const [company,  setCompany]  = useState({name:"",defaultTaxRate:6.5,paymentTerms:30,laborBurdenDefault:28.3});
   const [users,    setUsers]    = useState([]);
   const [sOpen,    setSOpen]    = useState(true);
@@ -873,7 +888,7 @@ export default function App() {
         // If API is unreachable, fall back to seed data for demo
         setCusts(SD_CUSTS); setEsts(SD_ESTS); setProjs(SD_PROJS); setMats(SD_MATS);
         setSubs(SD_SUBS); setRoles(SD_ROLES); setHrs(SD_HRS); setInvs(SD_INVS);
-        setCos(SD_COS); setExpenses(SD_EXPENSES); setUsers(SD_USERS); setCompany(SD_COMPANY);
+        setCos(SD_COS); setExpenses(SD_EXPENSES); setTasks(SD_TASKS); setUsers(SD_USERS); setCompany(SD_COMPANY);
       }
       setDataLoaded(true);
     };
@@ -978,7 +993,7 @@ export default function App() {
     users:    makeDb(setUsers, api.users),
   };
 
-  const sh = {custs,setCusts,ests,setEsts,projs,setProjs,mats,setMats,subs,setSubs,roles,setRoles,hrs,setHrs,invs,setInvs,cos,setCos,expenses,setExpenses,company,setCompany,users,setUsers,auth,setAuth:handleAuth,updateAuth,showToast,setTab,handleLogout,db};
+  const sh = {custs,setCusts,ests,setEsts,projs,setProjs,mats,setMats,subs,setSubs,roles,setRoles,hrs,setHrs,invs,setInvs,cos,setCos,expenses,setExpenses,tasks,setTasks,phases,setPhases,company,setCompany,users,setUsers,auth,setAuth:handleAuth,updateAuth,showToast,setTab,handleLogout,db};
 
   // ── Loading screen ─────────────────────────────────
   if (!dataLoaded && auth) return (
@@ -1889,12 +1904,12 @@ function Estimates({ests,setEsts,custs,projs,setProjs,invs,setInvs,mats,roles,co
 // ══════════════════════════════════════════════════════════════
 // PROJECTS
 // ══════════════════════════════════════════════════════════════
-function Projects({projs,setProjs,custs,ests,cos,invs,showToast,setTab,db}) {
+function Projects({projs,setProjs,custs,ests,cos,invs,tasks,setTasks,phases,subs,showToast,setTab,db}) {
   const [sel,  setSel]  = useState(projs[0]?.id||null);
   const [form, setForm] = useState(null);
   const sp=projs.find(p=>p.id===sel)||null;
   const blank={name:"",custId:"",status:"active",contractValue:"",budgetLabor:"",budgetMaterials:"",actualLabor:"0",actualMaterials:"0",start:tod(),end:addD(tod(),60),phase:"Planning",progress:0,notes:""};
-  const PHASES=["Planning","Permitting","Site Prep","Foundation","Framing","Rough-In","Insulation","Drywall","Finish Work","Punch List","Complete"];
+  const PHASES=phases;
 
   const openNew=()=>setForm({...blank,_id:null});
   const openEdit=p=>setForm({...p,_id:p.id,contractValue:String(p.contractValue),budgetLabor:String(p.budgetLabor),budgetMaterials:String(p.budgetMaterials),actualLabor:String(p.actualLabor),actualMaterials:String(p.actualMaterials),progress:String(p.progress)});
@@ -2015,7 +2030,116 @@ function Projects({projs,setProjs,custs,ests,cos,invs,showToast,setTab,db}) {
                 </div>;
               })}
             </div>
-            {sp.notes&&<div style={{background:"#0c0f17",border:"1px solid #111826",borderRadius:10,padding:"12px 15px"}}><div className="stl">Notes</div><div style={{fontSize:12,color:"#9aabb8",lineHeight:1.7}}>{sp.notes}</div></div>}
+            {sp.notes&&<div style={{background:"#0c0f17",border:"1px solid #111826",borderRadius:10,padding:"12px 15px",marginBottom:14}}><div className="stl">Notes</div><div style={{fontSize:12,color:"#9aabb8",lineHeight:1.7}}>{sp.notes}</div></div>}
+
+            {/* ── PROJECT TASKS ── */}
+            {(()=>{
+              const TASK_SC={todo:{bg:"rgba(100,116,139,.12)",c:"#94a3b8",label:"To Do"},in_progress:{bg:"rgba(59,130,246,.12)",c:"#3b82f6",label:"In Progress"},done:{bg:"rgba(34,197,94,.12)",c:"#22c55e",label:"Done"}};
+              const projTasks=tasks.filter(t=>t.projId===sp.id);
+              const byPhase={};
+              PHASES.forEach(function(ph){var pt=projTasks.filter(function(t){return t.phase===ph;});if(pt.length>0)byPhase[ph]=pt;});
+              const unphased=projTasks.filter(function(t){return !t.phase||!PHASES.includes(t.phase);});
+              if(unphased.length>0) byPhase["Unassigned"]=unphased;
+
+              const [taskForm,setTaskForm]=useState(null);
+              const addTask=()=>setTaskForm({id:null,phase:sp.phase||PHASES[0],title:"",assignedTo:null,status:"todo",dueDate:"",notes:""});
+              const saveTask=()=>{
+                if(!taskForm.title.trim()){showToast("Task title required","error");return;}
+                if(taskForm.id){
+                  setTasks(prev=>prev.map(t=>t.id===taskForm.id?{...t,...taskForm}:t));
+                  showToast("Task updated");
+                } else {
+                  var newT={...taskForm,id:"T-"+uid(),projId:sp.id};
+                  setTasks(prev=>[...prev,newT]);
+                  showToast("Task added");
+                }
+                setTaskForm(null);
+              };
+              const toggleTask=(tid)=>setTasks(prev=>prev.map(function(t){
+                if(t.id!==tid)return t;
+                var next=t.status==="todo"?"in_progress":t.status==="in_progress"?"done":"todo";
+                return{...t,status:next};
+              }));
+              const delTask=(tid)=>{setTasks(prev=>prev.filter(t=>t.id!==tid));showToast("Task removed");};
+
+              const donePct=projTasks.length>0?Math.round(projTasks.filter(t=>t.status==="done").length/projTasks.length*100):0;
+
+              return <div style={{background:"#0c0f17",border:"1px solid #111826",borderRadius:10,overflow:"hidden"}}>
+                <div style={{padding:"10px 15px",borderBottom:"1px solid #111826",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div style={{display:"flex",gap:10,alignItems:"center"}}>
+                    <span className="stl" style={{margin:0}}>Tasks</span>
+                    <span style={{fontSize:10,color:"#4a566e"}}>{projTasks.filter(t=>t.status==="done").length}/{projTasks.length} done</span>
+                    {projTasks.length>0&&<span style={{fontSize:10,color:donePct===100?"#22c55e":"#3b82f6",fontWeight:700}}>{donePct}%</span>}
+                  </div>
+                  <button onClick={addTask} className="bb b-bl" style={{padding:"4px 10px",fontSize:10}}><I n="plus" s={10}/>Add Task</button>
+                </div>
+                {projTasks.length===0&&<div style={{padding:20,textAlign:"center",color:"#3a4160",fontSize:12}}>No tasks yet. Click "Add Task" to get started.</div>}
+                {Object.keys(byPhase).map(function(ph){
+                  var pTasks=byPhase[ph];
+                  var phColor=ph===sp.phase?"var(--accent)":"#4a566e";
+                  return <div key={ph}>
+                    <div style={{padding:"6px 15px",background:"#080b12",borderBottom:"1px solid #0e1119",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                      <span style={{fontSize:10,fontWeight:700,color:phColor,textTransform:"uppercase",letterSpacing:.5}}>{ph}</span>
+                      <span style={{fontSize:9,color:"#3a4160"}}>{pTasks.filter(function(t){return t.status==="done";}).length}/{pTasks.length}</span>
+                    </div>
+                    {pTasks.map(function(t){
+                      var sub=subs.find(function(s){return s.id===t.assignedTo;});
+                      var st=TASK_SC[t.status]||TASK_SC.todo;
+                      return <div key={t.id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 15px",borderBottom:"1px solid #0e1119"}} className="rh">
+                        <button onClick={function(){toggleTask(t.id);}} style={{width:20,height:20,borderRadius:6,border:"2px solid "+(t.status==="done"?"#22c55e":"#2d3a52"),background:t.status==="done"?"rgba(34,197,94,.15)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0,transition:"all .15s"}}>
+                          {t.status==="done"&&<I n="check" s={12} style={{color:"#22c55e"}}/>}
+                        </button>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontSize:12,fontWeight:600,color:t.status==="done"?"#4a566e":"#c8d0e0",textDecoration:t.status==="done"?"line-through":"none"}}>{t.title}</div>
+                          <div style={{display:"flex",gap:8,marginTop:2,alignItems:"center",flexWrap:"wrap"}}>
+                            <span style={{padding:"1px 6px",borderRadius:6,fontSize:8,fontWeight:700,background:st.bg,color:st.c}}>{st.label}</span>
+                            {sub&&<span style={{fontSize:9,color:"#7a8299"}}>{sub.name}</span>}
+                            {t.dueDate&&<span style={{fontSize:9,color:t.dueDate<tod()&&t.status!=="done"?"#ef4444":"#4a566e"}}>{t.dueDate}</span>}
+                          </div>
+                        </div>
+                        <div style={{display:"flex",gap:3,flexShrink:0}}>
+                          <button onClick={function(){setTaskForm({...t});}} style={{padding:3,color:"#3a4160"}}><I n="edit" s={12}/></button>
+                          <button onClick={function(){delTask(t.id);}} style={{padding:3,color:"#3a4160"}}><I n="x" s={12}/></button>
+                        </div>
+                      </div>;
+                    })}
+                  </div>;
+                })}
+
+                {taskForm&&(
+                  <div style={{padding:"12px 15px",borderTop:"1px solid #1e2535",background:"#0a0d15"}}>
+                    <div style={{fontSize:12,fontWeight:700,marginBottom:8}}>{taskForm.id?"Edit Task":"New Task"}</div>
+                    <div className="g2" style={{marginBottom:8}}>
+                      <div><label className="lbl">Title *</label><input className="inp" value={taskForm.title} onChange={function(e){setTaskForm(function(f){return{...f,title:e.target.value};})}} placeholder="Task description"/></div>
+                      <div><label className="lbl">Phase</label>
+                        <select className="inp" value={taskForm.phase} onChange={function(e){setTaskForm(function(f){return{...f,phase:e.target.value};});}}>
+                          {PHASES.map(function(ph){return <option key={ph} value={ph}>{ph}</option>;})}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="g3" style={{marginBottom:8}}>
+                      <div><label className="lbl">Assign Crew</label>
+                        <select className="inp" value={taskForm.assignedTo||""} onChange={function(e){setTaskForm(function(f){return{...f,assignedTo:e.target.value?Number(e.target.value):null};});}}>
+                          <option value="">Unassigned</option>
+                          {subs.filter(function(s){return s.status==="active";}).map(function(s){return <option key={s.id} value={s.id}>{s.name} — {s.role}</option>;})}
+                        </select>
+                      </div>
+                      <div><label className="lbl">Status</label>
+                        <select className="inp" value={taskForm.status} onChange={function(e){setTaskForm(function(f){return{...f,status:e.target.value};});}}>
+                          <option value="todo">To Do</option><option value="in_progress">In Progress</option><option value="done">Done</option>
+                        </select>
+                      </div>
+                      <div><label className="lbl">Due Date</label><input className="inp" type="date" value={taskForm.dueDate||""} onChange={function(e){setTaskForm(function(f){return{...f,dueDate:e.target.value};});}}/></div>
+                    </div>
+                    <div style={{marginBottom:8}}><label className="lbl">Notes</label><input className="inp" value={taskForm.notes||""} onChange={function(e){setTaskForm(function(f){return{...f,notes:e.target.value};});}} placeholder="Optional notes"/></div>
+                    <div style={{display:"flex",gap:8}}>
+                      <button onClick={function(){setTaskForm(null);}} className="bb b-gh" style={{flex:1,padding:"8px",justifyContent:"center"}}>Cancel</button>
+                      <button onClick={saveTask} className="bb b-bl" style={{flex:2,padding:"8px",justifyContent:"center"}}><I n="check" s={12}/>{taskForm.id?"Update":"Add"} Task</button>
+                    </div>
+                  </div>
+                )}
+              </div>;
+            })()}
           </div>
         </div>
       ):(
@@ -3260,7 +3384,7 @@ function ToggleSwitch({defaultOn=false,on:controlledOn,onChange}) {
 // ══════════════════════════════════════════════════════════════
 // COMPANY SETUP
 // ══════════════════════════════════════════════════════════════
-function CompanySetup({company,setCompany,users,setUsers,showToast,db,roles,setRoles}) {
+function CompanySetup({company,setCompany,users,setUsers,showToast,db,roles,setRoles,phases,setPhases}) {
   const [stab, setStab] = useState("users");
   const [dirty, setDirty] = useState(false);
   // Always initialize form from latest company data
@@ -3328,6 +3452,7 @@ function CompanySetup({company,setCompany,users,setUsers,showToast,db,roles,setR
     {id:"roles",label:"Role Permissions",icon:"shield"},
     {id:"labor",label:"Labor Roles",icon:"wrench"},
     {id:"admin_roles",label:"Admin Roles",icon:"building"},
+    {id:"categories",label:"Categories",icon:"list"},
     {id:"email",label:"Email & Notifications",icon:"bell"},
     {id:"theme",label:"Theme & Branding",icon:"palette"},
     {id:"company",label:"Company Info",icon:"settings"},
@@ -3516,6 +3641,78 @@ function CompanySetup({company,setCompany,users,setUsers,showToast,db,roles,setR
       {stab==="admin_roles"&&(
         <LaborRoles roles={roles} setRoles={setRoles} showToast={showToast} db={db} filterFn={function(r){return MGMT_ROLES.has(r.title);}} heading="Administrative Roles"/>
       )}
+
+      {/* ── CATEGORIES TAB ── */}
+      {stab==="categories"&&(()=>{
+        const [newPhase,setNewPhase]=useState("");
+        const addPhase=()=>{
+          var v=newPhase.trim();
+          if(!v){showToast("Enter a phase name","error");return;}
+          if(phases.includes(v)){showToast("Phase already exists","error");return;}
+          setPhases(prev=>[...prev,v]);
+          setNewPhase("");
+          showToast("Phase added");
+        };
+        const delPhase=(ph)=>{
+          if(phases.length<=2){showToast("Must keep at least 2 phases","error");return;}
+          if(!confirm("Delete phase \""+ph+"\"? Existing projects using this phase won't be affected.")) return;
+          setPhases(prev=>prev.filter(p=>p!==ph));
+          showToast("Phase removed");
+        };
+        const movePhase=(idx,dir)=>{
+          var ni=idx+dir;
+          if(ni<0||ni>=phases.length)return;
+          var arr=[...phases];
+          var tmp=arr[idx];arr[idx]=arr[ni];arr[ni]=tmp;
+          setPhases(arr);
+        };
+
+        return <div style={{display:"flex",flexDirection:"column",gap:20,maxWidth:780}}>
+
+          {/* PROJECT PHASES */}
+          <div style={{background:"#0c0f17",border:"1px solid #111826",borderRadius:11,overflow:"hidden"}}>
+            <div style={{padding:"14px 18px",borderBottom:"1px solid #111826",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div>
+                <div style={{fontSize:15,fontWeight:800}}>Project Phases</div>
+                <div style={{fontSize:11,color:"#4a566e",marginTop:2}}>Define the construction phases used across all projects. Drag to reorder.</div>
+              </div>
+              <span style={{fontSize:11,color:"#4a566e",fontWeight:700}}>{phases.length} phases</span>
+            </div>
+
+            <div style={{padding:"12px 18px",borderBottom:"1px solid #111826",display:"flex",gap:8}}>
+              <input className="inp" value={newPhase} onChange={function(e){setNewPhase(e.target.value);}} onKeyDown={function(e){if(e.key==="Enter")addPhase();}} placeholder="New phase name…" style={{flex:1}}/>
+              <button onClick={addPhase} className="bb b-bl" style={{padding:"8px 14px",fontSize:12,flexShrink:0}}><I n="plus" s={12}/>Add Phase</button>
+            </div>
+
+            <div>
+              {phases.map(function(ph,i){
+                var isFirst=i===0;var isLast=i===phases.length-1;
+                return <div key={ph} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 18px",borderBottom:"1px solid #0e1119"}} className="rh">
+                  <div style={{display:"flex",flexDirection:"column",gap:2,flexShrink:0}}>
+                    <button onClick={function(){movePhase(i,-1);}} disabled={isFirst} style={{padding:1,color:isFirst?"#1e2535":"#4a566e",cursor:isFirst?"default":"pointer"}}><I n="arrow" s={10} style={{transform:"rotate(180deg)"}}/></button>
+                    <button onClick={function(){movePhase(i,1);}} disabled={isLast} style={{padding:1,color:isLast?"#1e2535":"#4a566e",cursor:isLast?"default":"pointer"}}><I n="arrow" s={10}/></button>
+                  </div>
+                  <span style={{fontSize:12,color:"#3a4160",fontWeight:700,width:20,textAlign:"center",flexShrink:0}}>{i+1}</span>
+                  <span style={{flex:1,fontSize:13,fontWeight:600,color:"#c8d0e0"}}>{ph}</span>
+                  {ph==="Complete"
+                    ?<span style={{fontSize:9,color:"#3a4160",fontStyle:"italic"}}>required</span>
+                    :<button onClick={function(){delPhase(ph);}} style={{padding:4,color:"#3a4160",flexShrink:0}} title="Remove"><I n="x" s={13}/></button>
+                  }
+                </div>;
+              })}
+            </div>
+          </div>
+
+          {/* INFO */}
+          <div style={{background:"rgba(59,130,246,.04)",border:"1px solid rgba(59,130,246,.12)",borderRadius:9,padding:"12px 16px"}}>
+            <div style={{fontSize:11,color:"#63b3ed",fontWeight:700,marginBottom:4}}>How Phases Work</div>
+            <div style={{fontSize:11,color:"#7a8299",lineHeight:1.7}}>
+              Phases define the construction stages for your projects. When you create or edit a project, you pick from this list. Tasks can also be assigned to phases, so your crew knows what belongs to each stage. Reorder them to match your typical build sequence.
+            </div>
+          </div>
+
+        </div>;
+      })()}
 
       {/* ── COMPANY INFO TAB ── */}
       {stab==="company"&&(
